@@ -1,0 +1,7 @@
+{{NTMtPEpisode
+|name = $title
+|prev = $prev
+|next = $next
+}}
+
+== Blurb ==

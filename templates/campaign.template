@@ -1,0 +1,12 @@
+{{CampaignEpisode
+|name = $title
+|arc = Campaign
+|pcs = [[Campaign:Bacta|Bacta]]<br />[[Campaign:Trystan Valentine|Tryst]]<br />[[Campaign:Leenik Geelo|Leenik]]<br />[[Campaign:Lyntel'luroon|Lyn]]<br />
+|npcs = [[Campaign:Tamlin Jorun|Tamlin]]<br />[[Campaign:Tony Vornskr|Tony Vornskr]]
+|prevR = [[Campaign:$prev|$prev]]
+|nextR = [[Campaign:$next|$next]]
+|prevC = [[Campaign:$prev|$prev]]
+|nextC = [[Campaign:$next|$next]]
+}}
+
+== Blurb ==

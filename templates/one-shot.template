@@ -1,0 +1,11 @@
+{{Episode
+|name = $title
+|prev = $prev
+|next = $next
+|gm = $gm
+|players = $players
+|system = $system
+|series = $series
+}}
+
+== Blurb ==

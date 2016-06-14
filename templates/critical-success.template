@@ -1,0 +1,7 @@
+{{CriticalSuccessEpisode
+|name = $title
+|prev = $prev
+|next = $next
+}}
+
+== Blurb ==

@@ -1,0 +1,12 @@
+
+*.jpg
+
+*.gif
+
+test_files
+
+*.pyc
+
+logs
+
+*.etag

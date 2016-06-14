@@ -1,0 +1,8 @@
+{{ModifierEpisode
+|name = $title
+|guest = $guest
+|prev = $prev
+|next = $next
+}}
+
+== Blurb ==

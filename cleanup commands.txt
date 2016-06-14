@@ -1,0 +1,14 @@
+python pwb.py add_text -cat:Performers -summary:"Beep-Boop Adding Performer template" -text:"{{Performer}}" -except:"\{\{([Tt]emplate:|)[Pp]erformer" -up
+
+python pwb.py add_text -file:"userfiles/performers" -summary:"Beep-Boop Adding Performer template" -text:"{{Performer}}" -except:"\{\{([Tt]emplate:|)[Pp]erformer" -up
+
+python pwb.py category move -from:"Campaign:Ships (Relationships)" -to:"Campaign Ships (Relationships)" -summary:"Beep Boop this edit was done by a droid" -simulate
+
+python pwb.py replace -cat:"Campaign:Ships (Relationships)" "Category:Campaign:Ships (Relationships)" "Category:Campaign Ships (Relationships)" -summary:"Beep Boop this edit was done by a droid" -simulate
+
+python pwb.py replace -links:"One Shot" -regex "\|[Ss]eries ?= ?([^\[]*?)\n?\|" "|series = [[\1 (series)|\1]]\n|" -summary:"Beep Boop this edit was done by a droid" -simulate
+
+python pwb.py replace -links:"Campaign:Campaign" -regex "</?h.*?>" "==" -summary:"Beep Boop this edit was done by a droid"
+
+python pwb.py replace -page:Backstory -simulate -summary:"Beep-Boop This edit was done by a droid" -regex -replacementfile:"userfiles/listen_links"
+
