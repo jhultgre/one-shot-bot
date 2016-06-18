@@ -43,6 +43,7 @@ class EpisodeInfo(object):
             self._process_page()
     
     def _extract(self, pattern):
+        '''returns list of strings or empty list'''
         found = re.findall(pattern, self.text)
         data = []
         if found:        
@@ -55,9 +56,9 @@ class EpisodeInfo(object):
                     data.append(item)
         return data
 
-    """Extract info from page"""
+    
     def _process_page(self):
-        pass
+        '''Extract info from page'''
         # get gm
         logger.debug('Extract GM')
         self.gm = self._extract(self.gm_re)

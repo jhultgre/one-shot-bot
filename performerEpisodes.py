@@ -7,6 +7,7 @@ import logging
 import logging.handlers
 # import difflib
 import wikiatools
+from pagetools import EpisodeInfo 
 from boop_generator import get_boop
 
 reload(sys)  
@@ -39,8 +40,6 @@ logger.addHandler(ch)
 logger = logging.getLogger('perfomers')
 
 #regex patterns
-guest_re = r'\|(?:[Gg]uest|[Pp]layers|[Gg]m) ?= ?((?:.|\n)*?)(?=(?:\|\w* =)|}})'
-series_re = r'\|[Ss]eries ?= ?(.*?)(?:\n|\|\w* =)'
 appearences_re = r'== ?Featured Episodes(?: and Series)? ?==(?:\n\* ?.*)*'
 player_re = r'== ?Players? ?==(?:\n\* ?.*)*'
 titles_re = r'(?:\* \[\[)(.*)(?:\|)(.*)(?:\]\])'
@@ -86,54 +85,44 @@ series_system = {}
 for ep in os.listdir(episodes_path):
     if 'Template' in ep:
         continue
-    with open(os.path.join(episodes_path, ep)) as f:
-        episode = ep.replace('_', ' ')
-        page = f.read()
 
-        perfs = re.findall(guest_re, page)
-        # print perfs
-        if perfs:        
-            names = re.findall(r'\[\[(.*?)\]\]', ''.join(perfs))
-            if names:
-                for name in names:
-                    if '|' in name:
-                        name = name.split('|')[0]
-                    if name in performers:
-                        performers[name].append(episode)
-                    else:
-                        performers[name] = [episode]
-        series_raw = re.search(series_re,page)
-        if series_raw:
-            series_raw = series_raw.groups()[0]
-            series_name = re.findall(r'\[\[(.*?)\]\]', series_raw)
-            if series_name:
-                series_name = series_name[0]
+    episode = ep.replace('_', ' ')
 
-                if '|' in series_name:
-                    series_name = series_name.split('|')[0]
+    episode_info = EpisodeInfo(ep)
+    names = episode_info.get_gm() + episode_info.get_players()
+    for name in names:
+        if name in performers:
+            performers[name].append(episode)
+        else:
+            performers[name] = [episode]
 
-                if 'Campaign:' in series_name:
-                    logger.info('Skipping Campaign')
-                    episodes[episode] = 'Campaign:Campaign'
-                    continue
-                if '(series)' not in series_name:
-                    logger.warning('=========================== (series) not in '+series_name)
 
-                if series_name in series:
-                    series[series_name].append(episode)
-                else:
-                    series[series_name] = [episode]
-                # series performers
-                if series_name in series_performers:
-                    series_performers[series_name].update(names)
-                else:
-                    series_performers[series_name] = set(names)
-                # series systems
-                if series_name in series_system:
-                    series_system[series_name].update(names)
-                else:
-                    series_system[series_name] = set(names)
-                episodes[episode] = series_name
+    series_name = episode_info.get_series()
+    if series_name:
+        series_name = series_name[0]
+
+        if 'Campaign:' in series_name:
+            logger.info('Skipping Campaign')
+            episodes[episode] = 'Campaign:Campaign'
+            continue
+        if '(series)' not in series_name:
+            logger.warning('=========================== (series) not in '+series_name)
+
+        if series_name in series:
+            series[series_name].append(episode)
+        else:
+            series[series_name] = [episode]
+        # series performers
+        if series_name in series_performers:
+            series_performers[series_name].update(names)
+        else:
+            series_performers[series_name] = set(names)
+        # series systems
+        if series_name in series_system:
+            series_system[series_name].update(names)
+        else:
+            series_system[series_name] = set(names)
+        episodes[episode] = series_name
                 
 
 commands = []
