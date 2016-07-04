@@ -2,5 +2,6 @@ x check if previous ep exists and grab preformers, gm, series, and system.
 x move ttt guest check to backstory system
 x reduce downloaded pages durring maintanice script
 * only replace pages if changes
-* update performer episodes to use pagetools system
+x update performer episodes to use pagetools system
 * get full blurb
+* cleanup ntmtp formating

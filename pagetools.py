@@ -1,14 +1,17 @@
 # -*- coding: utf-8  -*-
+from __future__ import unicode_literals
 import logging
 import os
 import re
 import sys
 import codecs
+import io
+
 
 reload(sys)  
-sys.setdefaultencoding('utf8')
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+sys.setdefaultencoding('utf-8')
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +39,7 @@ class EpisodeInfo(object):
         path = os.path.join('test_files/episodes/', ep)
 
         if os.path.exists(path):
-            with open(path) as f:
+            with io.open(path, encoding='utf-8') as f:
                 self.text = f.read()
 
         if self.text:
@@ -47,13 +50,16 @@ class EpisodeInfo(object):
         found = re.findall(pattern, self.text)
         data = []
         if found:        
-            items = re.findall(r'\[\[(.*?)\]\]', ''.join(found))
+            items = re.findall(ur'\[\[(.*?)\]\]', ''.join(found))
 
             for item in items:
+
                 if '|' in item:
-                    data.append(item.split('|')[0])
-                else:
-                    data.append(item)
+                    item = item.split('|')[0]
+                if '’' in item:
+                    raise ValueError(u'bad apostrophy in %s for %s' % (self.page, item))
+
+                data.append(item)
         return data
 
     
@@ -80,10 +86,10 @@ class EpisodeInfo(object):
         return '[[%s]]' % links
 
 
-    def get_gm(self, link=False):
+    def get_gm(self, link=False, default=True):
         logger.debug('Return GM')
         if link:
-            if not self.text:
+            if not self.text and default:
                 return "[[James D'Amato]]"
             return self._make_links(self.gm)
         else:
@@ -117,7 +123,7 @@ class EpisodeInfo(object):
             return self.series
 
 if __name__ == '__main__':
-    ep = EpisodeInfo('Episode 147')
+    ep = EpisodeInfo('Episode 14')
     print ep.get_gm(True)
     print ep.get_players()
     print ep.get_series()

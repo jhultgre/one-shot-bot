@@ -14,14 +14,14 @@ import wikiatools
 DEBUG = False
 
 reload(sys)  
-sys.setdefaultencoding('utf8')
+sys.setdefaultencoding('utf-8')
 
 file_output = '../core/userfiles/new_pages'
 log_file = 'logs/episode_feed.log'
 
 
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

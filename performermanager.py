@@ -1,19 +1,20 @@
 # -*- coding: utf-8  -*-
+from __future__ import unicode_literals
 import sys
 import codecs
 import re
 import os
 import logging
 import logging.handlers
-# import difflib
 import wikiatools
 from pagetools import EpisodeInfo 
 from boop_generator import get_boop
 
+
 reload(sys)  
-sys.setdefaultencoding('utf8')
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+sys.setdefaultencoding('utf-8')
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
 
 DEBUG = False
 clean = False
@@ -57,8 +58,6 @@ replace_appearences_command = 'python pwb.py replace -page:"%s" -regex "' + appe
 replace_players_command = 'python pwb.py replace -page:"%s" -regex "' + player_re +'" "%s" -summary:"%s Updating episodes was done by a droid" -always'
 
 file_output = '../core/userfiles/%s'
-# perfomers_output = '../core/userfiles/performers'
-# series_output = '../core//userfiles/series'
 
 episodes_path = 'test_files/episodes/'
 perfomers_path = 'test_files/performers/'
@@ -77,11 +76,13 @@ if not DEBUG:
 #clear new pages
 wikiatools.clear_new_pages()
 
+#TODO try replacing these dictionaries with a database
 performers = {}
 series = {}
 episodes = {}
 series_performers = {}
 series_system = {}
+
 for ep in os.listdir(episodes_path):
     if 'Template' in ep:
         continue
@@ -91,6 +92,7 @@ for ep in os.listdir(episodes_path):
     episode_info = EpisodeInfo(ep)
     names = episode_info.get_gm() + episode_info.get_players()
     for name in names:
+
         if name in performers:
             performers[name].append(episode)
         else:
@@ -100,7 +102,6 @@ for ep in os.listdir(episodes_path):
     series_name = episode_info.get_series()
     if series_name:
         series_name = series_name[0]
-
         if 'Campaign:' in series_name:
             logger.info('Skipping Campaign')
             episodes[episode] = 'Campaign:Campaign'
@@ -180,6 +181,8 @@ for name, v in sorted(performers.items(),key=lambda (name, v): v, reverse=True):
                 logger.debug(' '.join([name,featured_list]))
                 # if abs(len(contents) - len(featured_list)) > 4:
                 logger.info('updating ' + name)
+
+                # TODO check if anything has actually changed
                 commands.append(replace_appearences_command % (name, contents, get_boop()))
                 
             else:

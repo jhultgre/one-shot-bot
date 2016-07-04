@@ -10,3 +10,5 @@ test_files
 logs
 
 *.etag
+
+*.db
