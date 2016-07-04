@@ -4,6 +4,7 @@ import sys
 import codecs
 import re
 import os
+import sqlite3
 import logging
 import logging.handlers
 import wikiatools
@@ -16,8 +17,11 @@ sys.setdefaultencoding('utf-8')
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
 
-DEBUG = False
+DEBUG = True
 clean = False
+# connect to database
+conn = sqlite3.connect('oneshot.db')
+cursor = conn.cursor()
 
 #setup logging
 log_file = 'logs/perfomers.log'
@@ -91,6 +95,20 @@ for ep in os.listdir(episodes_path):
 
     episode_info = EpisodeInfo(ep)
     names = episode_info.get_gm() + episode_info.get_players()
+    print names
+    cursor.executemany('insert or ignore into performers(name) values(?);', [(n,) for n in names])
+    cursor.execute('insert or ignore into episodes(episode) values(?);', (episode,))
+    conn.commit()
+    cursor.executemany('''
+                       insert into ep_perfs(eid,id) 
+                       select episodes.eid, performers.id
+                       from episodes, performers
+                       where episodes.episode=?
+                       and performers.name=?;
+                       ''',
+                       [(episode,n) for n in names])
+    conn.commit()
+    
     for name in names:
 
         if name in performers:
@@ -102,6 +120,20 @@ for ep in os.listdir(episodes_path):
     series_name = episode_info.get_series()
     if series_name:
         series_name = series_name[0]
+        if 'Campaign:' in series_name:
+            series_name = 'Campaign:Campaign'
+        cursor.execute('insert or ignore into series(series_name) values(?);',(series_name,))
+        conn.commit()
+        cursor.execute('''
+                       insert into series_eps(sid,eid)
+                       select series.sid, episodes.eid
+                       from series, episodes
+                       where series.series_name=?
+                       and episodes.episode=?;
+                       ''', (series_name,episode))
+        conn.commit()
+
+        # what is this doing?
         if 'Campaign:' in series_name:
             logger.info('Skipping Campaign')
             episodes[episode] = 'Campaign:Campaign'
