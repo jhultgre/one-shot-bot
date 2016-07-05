@@ -80,13 +80,6 @@ if not DEBUG:
 #clear new pages
 wikiatools.clear_new_pages()
 
-#TODO try replacing these dictionaries with a database
-performers = {}
-series = {}
-episodes = {}
-series_performers = {}
-series_system = {}
-
 for ep in os.listdir(episodes_path):
     if 'Template' in ep:
         continue
@@ -95,7 +88,7 @@ for ep in os.listdir(episodes_path):
 
     episode_info = EpisodeInfo(ep)
     names = episode_info.get_gm() + episode_info.get_players()
-    print names
+    # setup performers and episodes
     cursor.executemany('insert or ignore into performers(name) values(?);', [(n,) for n in names])
     cursor.execute('insert or ignore into episodes(episode) values(?);', (episode,))
     conn.commit()
@@ -109,19 +102,15 @@ for ep in os.listdir(episodes_path):
                        [(episode,n) for n in names])
     conn.commit()
     
-    for name in names:
-
-        if name in performers:
-            performers[name].append(episode)
-        else:
-            performers[name] = [episode]
-
-
+    # setup series
     series_name = episode_info.get_series()
     if series_name:
         series_name = series_name[0]
         if 'Campaign:' in series_name:
             series_name = 'Campaign:Campaign'
+        if '(series)' not in series_name:
+            logger.warning('=========================== (series) not in '+series_name)
+
         cursor.execute('insert or ignore into series(series_name) values(?);',(series_name,))
         conn.commit()
         cursor.execute('''
@@ -131,39 +120,17 @@ for ep in os.listdir(episodes_path):
                        where series.series_name=?
                        and episodes.episode=?;
                        ''', (series_name,episode))
-        conn.commit()
-
-        # what is this doing?
-        if 'Campaign:' in series_name:
-            logger.info('Skipping Campaign')
-            episodes[episode] = 'Campaign:Campaign'
-            continue
-        if '(series)' not in series_name:
-            logger.warning('=========================== (series) not in '+series_name)
-
-        if series_name in series:
-            series[series_name].append(episode)
-        else:
-            series[series_name] = [episode]
-        # series performers
-        if series_name in series_performers:
-            series_performers[series_name].update(names)
-        else:
-            series_performers[series_name] = set(names)
-        # series systems
-        if series_name in series_system:
-            series_system[series_name].update(names)
-        else:
-            series_system[series_name] = set(names)
-        episodes[episode] = series_name
-                
+        conn.commit()              
 
 commands = []
+# get current perfomer and series pages
 with open(file_output % 'performers','w') as f:
-    for name in sorted(performers.keys()):
+    cursor.execute('''select name from performers;''')
+    for name in sorted(p[0] for p in cursor.fetchall()):
         f.write('[[%s]]' % name)
 with open(file_output % 'series','w') as f:
-    for name in sorted(series.keys()):
+    cursor.execute('''select series_name from series;''')
+    for name in sorted(s[0] for s in cursor.fetchall()):
         f.write('[[%s]]' % name)
 with open(file_output % 'mainpages','w') as f:
     for name in ['One Shot','Critical Success','First Watch','Backstory','Modifier','Talking TableTop',"Hero's Journey"]:
@@ -187,15 +154,27 @@ if not DEBUG:
     wikiatools.run_command(get_command.format('performers'))
 
 # generate apperences 
-for name, v in sorted(performers.items(),key=lambda (name, v): v, reverse=True):
+cursor.execute('''select name from performers''')
+names = cursor.fetchall()
+logger.info('format appearences')
+for name in [n[0] for n in names]:
     # logger.info(name)
     contents = '== Featured Episodes and Series =='
     links = []
-    for ep in v:
-        if ep in episodes:
-            if not episodes[ep] in links:
-                links.append(episodes[ep])
-        elif ep in titles:
+    cursor.execute('''
+                   select distinct
+                   ifnull(series.series_name,episodes.episode)
+                   from performers
+                   join ep_perfs on performers.id = ep_perfs.id
+                   join episodes on ep_perfs.eid = episodes.eid
+                   left join series_eps on ep_perfs.eid = series_eps.eid
+                   left join series on series_eps.sid = series.sid
+                   where performers.name=?;
+                   ''', (name,))
+
+    appearences = cursor.fetchall()
+    for ep in [a[0] for a in appearences]:
+        if ep in titles:
             links.append(ep+'|'+titles[ep])
         else:
             links.append(ep)
@@ -209,13 +188,14 @@ for name, v in sorted(performers.items(),key=lambda (name, v): v, reverse=True):
         with open(perfomer_file) as f:
             page = f.read()
             if 'Featured Episodes and Series' in page:
-                featured_list = re.findall(appearences_re, page)[0]
-                logger.debug(' '.join([name,featured_list]))
-                # if abs(len(contents) - len(featured_list)) > 4:
-                logger.info('updating ' + name)
 
-                # TODO check if anything has actually changed
-                commands.append(replace_appearences_command % (name, contents, get_boop()))
+                updated_page = re.sub(appearences_re,contents,page)
+
+                if page != updated_page:
+                    logger.info('updating ' + name)
+                    commands.append(replace_appearences_command % (name, contents, get_boop()))
+                else:
+                    logger.info('no changes to ' + name)
                 
             else:
                 #add appearences
@@ -232,12 +212,21 @@ if not DEBUG:
     wikiatools.run_command(get_command.format('series'))
 
 # create new series pages
-for name, eps in sorted(series.items()):
+cursor.execute('''select series_name from series;''')
+for name in sorted(s[0] for s in cursor.fetchall()):
     # print name, eps
     
     contents = '== Featured Episodes =='
     links = []
-    for ep in eps:
+    cursor.execute('''
+                   select distinct
+                   episode
+                   from series, series_eps, episodes
+                   where series.sid=series_eps.sid
+                   and series_eps.eid=episodes.eid
+                   and series.series_name=?;
+                   ''',(name,))
+    for ep in [e[0] for e in cursor.fetchall()]:
         if ep in titles:
             links.append(ep+'|'+titles[ep])
         else:
@@ -247,7 +236,16 @@ for name, eps in sorted(series.items()):
         contents += '\n* [[%s]]' % ep
 
     player_contents = '== Players =='
-    for p in sorted(series_performers[name]):
+    cursor.execute('''
+                   select distinct
+                   name
+                   from series, series_eps, ep_perfs, performers
+                   where series.sid=series_eps.sid
+                   and series_eps.eid=ep_perfs.eid
+                   and ep_perfs.id=performers.id
+                   and series.series_name=?;
+                   ''',(name,))
+    for p in sorted([n[0] for n in cursor.fetchall()]):
         player_contents +='\n* [[%s]]' % p
     logger.debug(player_contents)
 
