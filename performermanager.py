@@ -17,7 +17,7 @@ sys.setdefaultencoding('utf-8')
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
 
-DEBUG = True
+DEBUG = False
 clean = False
 # connect to database
 conn = sqlite3.connect('oneshot.db')
@@ -215,7 +215,8 @@ if not DEBUG:
 cursor.execute('''select series_name from series;''')
 for name in sorted(s[0] for s in cursor.fetchall()):
     # print name, eps
-    
+    if 'Campaign:' in name:
+        continue
     contents = '== Featured Episodes =='
     links = []
     cursor.execute('''
