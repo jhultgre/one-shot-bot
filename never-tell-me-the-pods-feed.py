@@ -103,8 +103,11 @@ def get_episodes(feed):
         desc = wikiatools.format_links(desc)
         desc = wikiatools.format_text(desc)
 
-        link = f.link
+        # fix for leading spaces
+        desc = re.sub('\n *','\n',desc)
 
+        link = f.link
+        
         logger.info('==========')
         logger.info(title)
         logger.info(desc)
