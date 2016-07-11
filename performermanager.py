@@ -266,11 +266,15 @@ for name in sorted(s[0] for s in cursor.fetchall()):
         with open(series_file) as f:
             page = f.read()
             if 'Featured Episodes' in page:
-                featured_list = re.findall(appearences_re, page)[0]
-                logger.debug(' '.join([name,featured_list]))
+                # featured_list = re.findall(appearences_re, page)[0]
+                # logger.debug(' '.join([name,featured_list]))
                 # if abs(len(contents) - len(featured_list)) > 10:
-                logger.info('updating episodes ' + name)
-                commands.append(replace_appearences_command % (name, contents, get_boop()))
+
+                updated_page = re.sub(appearences_re,contents,page)
+
+                if page != updated_page:
+                    logger.info('updating episodes ' + name)
+                    commands.append(replace_appearences_command % (name, contents, get_boop()))
                 
             else:
                 #add appearences
@@ -278,8 +282,11 @@ for name in sorted(s[0] for s in cursor.fetchall()):
                 commands.append(add_appearences_command % (name, contents, get_boop()))
             # series performers
             if 'Players' in page:
-                logger.info('updating players '+ name)
-                commands.append(replace_players_command % (name, player_contents, get_boop()))
+                updated_page = re.sub(player_re,contents,page)
+
+                if page != updated_page:
+                    logger.info('updating players '+ name)
+                    commands.append(replace_players_command % (name, player_contents, get_boop()))
             else:
                 #add appearences
                 logger.info('adding players ' + name)
