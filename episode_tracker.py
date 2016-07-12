@@ -13,7 +13,7 @@ sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 logger = logging.getLogger(__name__)
 
 class EpisodeManager(object):
-    """docstring for EpisodeManager"""
+    """Keeps track of the episdoe number of complicated episode feeds"""
     def __init__(self, podcast,offset=0):
         super(EpisodeManager, self).__init__()
         logger.info('creating episode manger for %s' % podcast)
