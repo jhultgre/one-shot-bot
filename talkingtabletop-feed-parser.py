@@ -1,15 +1,12 @@
 import feedparser
-import numberutilites as num_utils
 import sys
 import os
 import codecs
 import logging
 import logging.handlers
 import re
-import unicodedata
 import string
 from boop_generator import get_boop
-from datetime import datetime
 import wikiatools
 
 file_output = '../core/userfiles/new_pages'
@@ -22,7 +19,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-filehandler = logging.handlers.TimedRotatingFileHandler(log_file, when='midnight',backupCount=7)
+filehandler = logging.handlers.TimedRotatingFileHandler(log_file, when='midnight', backupCount=7)
 filehandler.setFormatter(formatter)
 
 logger.addHandler(filehandler)
@@ -36,12 +33,13 @@ logger = logging.getLogger('episode feed')
 
 remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
 
+
 def main():
     logger.info('Main')
 
-    talkingtabletop_rss = 'http://simplecast.fm/podcasts/1325/rss'
+    # talkingtabletop_rss = 'http://simplecast.fm/podcasts/1325/rss'
     herosjourney_rss = 'http://simplecast.fm/podcasts/1328/rss'
-    
+
     # clear episode file
     logger.info('clear episode file')
     x = open(file_output, 'w')
@@ -59,16 +57,17 @@ def main():
 
     logger.info('sending pages to wiki')
     command = 'python pwb.py pagefromfile -file:userfiles/new_pages -begin:XXX_BEGIN_XXX -end:XXX__END__XXX -summary:"%s this page was added by a droid"' % get_boop()
-    
+
     logger.info('changing dir')
     os.chdir('../core/')
-    
+
     logger.debug(command)
     os.system(command)
 
     os.chdir('../one-shot-bot/')
-    
+
     logger.info('Finished')
+
 
 def get_episodes(feed, podcast):
     logger.info('get episodes')
@@ -88,7 +87,7 @@ def get_episodes(feed, podcast):
         desc = wikiatools.format_links(desc)
         desc = wikiatools.format_text(desc)
 
-        link = title.translate(remove_punctuation_map).replace(' ','-')
+        link = title.translate(remove_punctuation_map).replace(' ', '-')
 
         logger.info('==========')
         logger.info(title)
@@ -110,20 +109,20 @@ def get_episodes(feed, podcast):
                     episode = 'Talking TableTop %s' % number
                     prev_episode = '[[Talking TableTop %s]]' % (number - 1)
                     next_episode = '[[Talking TableTop %s]]' % (number + 1)
-        
+
                 else:
                     episode = 'Talking TableTop %s' % title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc +'\n[[Category:Kill All Episodes]]'
+                    desc = desc + '\n[[Category:Kill All Episodes]]'
 
                 if 'with' in title:
                     guest = '[[%s]]' % title.split('with')[1].strip()
                 else:
                     guest = ''
-                logger.info('guest is %s' ,guest)
-                
-        elif podcast =='heros':
+                logger.info('guest is %s', guest)
+
+        elif podcast == 'heros':
             link = 'http://talkingtabletop.net/heros-journey/%s/' % link
             desc = desc + '\n\n[%s Listen!]' % link
             with open('templates/heros-journey.template') as f:
@@ -132,22 +131,22 @@ def get_episodes(feed, podcast):
                     episode = 'Hero\'s Journey %s' % number
                     prev_episode = '[[Hero\'s Journey %s]]' % (number - 1)
                     next_episode = '[[Hero\'s Journey %s]]' % (number + 1)
-        
+
                 else:
                     episode = 'Hero\'s Journey %s' % title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc +'\n[[Category:Kill All Episodes]]'
+                    desc = desc + '\n[[Category:Kill All Episodes]]'
 
                 if 'Emily' in title:
                     guest = '[[Emily]]'
                 else:
                     guest = ''
 
-        
-        template = template.replace('$title',title).replace('$prev',prev_episode).replace('$next',next_episode).replace('$guest',guest)
+        template = template.replace('$title', title).replace('$prev', prev_episode).replace('$next', next_episode).replace('$guest', guest)
         logger.debug(template)
-        wikiatools.write_page(title=episode, content=template + '\n' + desc,file_output=file_output)
+        wikiatools.write_page(title=episode, content=template + '\n' + desc, file_output=file_output)
 
 if __name__ == '__main__':
     main()
+    

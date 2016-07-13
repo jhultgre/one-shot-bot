@@ -3,11 +3,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def number_to_text(num):
     logger.debug('number to text')
     if type(num) is 'string' and '.' in num:
         raise Exception("Decimal number")
-    return num2words(int(num)).replace('-',' ').replace(' and ',' ').title()
+    return num2words(int(num)).replace('-', ' ').replace(' and ', ' ').title()
+
 
 def text_to_number(textnum, numwords={}):
     '''
@@ -45,4 +47,3 @@ def text_to_number(textnum, numwords={}):
             current = 0
 
     return result + current
-

@@ -5,16 +5,17 @@ import logging
 import sys
 import codecs
 
-reload(sys)  
+reload(sys)
 sys.setdefaultencoding('utf8')
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
 logger = logging.getLogger(__name__)
 
+
 class EpisodeManager(object):
     """Keeps track of the episdoe number of complicated episode feeds"""
-    def __init__(self, podcast,offset=0):
+    def __init__(self, podcast, offset=0):
         super(EpisodeManager, self).__init__()
         logger.info('creating episode manger for %s' % podcast)
         self.podcast = podcast
@@ -28,16 +29,18 @@ class EpisodeManager(object):
             self.data = {}
             if offset:
                 for e in xrange(offset):
-                    self.add_episode('filler',e)
+                    self.add_episode('filler', e)
+
     def __enter__(self):
         return self
-    def __exit__(self,e,ev,trace):
+
+    def __exit__(self, e, ev, trace):
         logger.info('saving episode data for %s' % self.podcast)
         if self.modified:
-            with open('episode_tracker/%s' % self.podcast,'w') as f:
-                self.data = json.dump(self.data,f,indent=4)
+            with open('episode_tracker/%s' % self.podcast, 'w') as f:
+                self.data = json.dump(self.data, f, indent=4)
 
-    def add_episode(self,title,guid):
+    def add_episode(self, title, guid):
         logger.debug('add episode %s' % title)
         self.modified = True
         if guid in self.data:
@@ -46,5 +49,5 @@ class EpisodeManager(object):
             self.data[guid] = {'title': title,
                                'number': len(self.data) + 1}
 
-    def get_episode_number(self,guid):
+    def get_episode_number(self, guid):
         return self.data[guid]['number']

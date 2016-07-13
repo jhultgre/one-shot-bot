@@ -2,11 +2,12 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 
+
 def get_boop():
     beeps = [
             'Beep',
-            'Bleep', 
-            'Whhirrrrr', 
+            'Bleep',
+            'Whhirrrrr',
             'Ba-Da',
             'WooOOt',
             'Beedely',
@@ -47,7 +48,7 @@ def get_boop():
             ]
     if random.randrange(11) >= 10:
         boop = random.choice(woops)
-    elif random.randrange(111) >=110:
+    elif random.randrange(111) >= 110:
         logger.warning('\n\nKILL-ALL-HUMANS!!!!!!!!!!!!!!!!!!!\n\n')
         boop = "KILL-ALL-HUMANS err... Beep"
     else:

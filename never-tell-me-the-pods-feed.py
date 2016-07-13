@@ -1,19 +1,15 @@
 # -*- coding: utf-8  -*-
 import feedparser
-import numberutilites as num_utils
 import sys
-import os
 import codecs
 import logging
 import logging.handlers
 import re
-from boop_generator import get_boop
-from datetime import datetime
 import wikiatools
 
 DEBUG = False
 
-reload(sys)  
+reload(sys)
 sys.setdefaultencoding('utf-8')
 
 file_output = '../core/userfiles/new_pages'
@@ -27,9 +23,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 if DEBUG:
     logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s == %(message)s','%y/%m/%d-%H:%M:%S')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s == %(message)s', '%y/%m/%d-%H:%M:%S')
 
-filehandler = logging.handlers.TimedRotatingFileHandler(log_file, when='midnight',backupCount=7)
+filehandler = logging.handlers.TimedRotatingFileHandler(log_file, when='midnight', backupCount=7)
 filehandler.setFormatter(formatter)
 
 
@@ -42,11 +38,12 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 logger = logging.getLogger('episode feed')
 
+
 def main():
     logger.info('Main')
     # ?paged=2 to go back pages
     ntmtp_rss = 'http://nevertellmethepods.com/rss'
-    
+
     # clear episode file
     logger.info('clear episode file')
     wikiatools.clear_new_pages()
@@ -65,13 +62,13 @@ def main():
     if feed.status == 304:
         logger.info('No new episodes quiting')
         return
-    
+
     # process episodes
     commands = get_episodes(feed)
     # logger.info('Commands')
     # logger.info(commands)
     # logger.info('sending pages to wiki')
-    
+
     if not DEBUG:
         wikiatools.post_pages()
         for c in commands:
@@ -82,8 +79,9 @@ def main():
     #     logger.info('writing etag: %s' % feed.etag)
     #     if not DEBUG:
     #         f.write(feed.etag)
-    
+
     logger.info('Finished')
+
 
 def get_episodes(feed):
     logger.info('get episodes')
@@ -104,22 +102,21 @@ def get_episodes(feed):
         desc = wikiatools.format_text(desc)
 
         # fix for leading spaces
-        desc = re.sub('\n *','\n',desc)
+        desc = re.sub('\n *', '\n', desc)
 
         link = f.link
-        
+
         logger.info('==========')
         logger.info(title)
         logger.info(desc)
         logger.info(link)
 
-        
         try:
             number = int(re.findall(r'\d+', title)[0])
         except:
-            logger.info('No number in '+title)
+            logger.info('No number in ' + title)
             continue
-        #episode post
+        # episode post
         if 'episode' in title.lower():
             desc = desc + '\n\n[%s Listen!]' % link
             with open('templates/ntmtp.template') as f:
@@ -130,19 +127,17 @@ def get_episodes(feed):
                 # title exists
 
                 episode = 'NTMtP %s' % number
-                commands.append(wikiatools.update_episode_list('Never Tell Me The Pods', episode,'NTMtP ' + title,link))
+                commands.append(wikiatools.update_episode_list('Never Tell Me The Pods', episode, 'NTMtP ' + title, link))
 
-                template = template.replace('$title',title).replace('$prev',prev_episode).replace('$next',next_episode)
+                template = template.replace('$title', title).replace('$prev', prev_episode).replace('$next', next_episode)
                 logger.debug(template)
                 wikiatools.write_page(title=episode, content=template + '\n' + desc)
-
 
         # annotations
         elif 'annotation' in title.lower():
             # add command to update annotations
-            desc = '\n== Annotations ==\n'+desc + '\n\n[%s Direct Link!]' % link
+            desc = '\n== Annotations ==\n' + desc + '\n\n[%s Direct Link!]' % link
             commands.append(wikiatools.add_text_command('NTMtP %s' % number, desc, '(== [Aa]nnotations ==)'))
-
 
     return commands
 

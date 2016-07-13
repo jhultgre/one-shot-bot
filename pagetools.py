@@ -8,12 +8,14 @@ import codecs
 import io
 
 
-reload(sys)  
+reload(sys)
+
 sys.setdefaultencoding('utf-8')
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
 
 logger = logging.getLogger(__name__)
+
 
 class EpisodeInfo(object):
     guest_re = r'\|(?:[Gg]uest|[Pp]layers) ?= ?((?:.|\n)*?)(?=(?:\|\w* =)|}})'
@@ -24,7 +26,7 @@ class EpisodeInfo(object):
 
     """Gets information about episode page"""
     def __init__(self, page):
-        logger.info('Get info for: '+page)
+        logger.info('Get info for: ' + page)
 
         super(EpisodeInfo, self).__init__()
         self.page = page
@@ -44,12 +46,12 @@ class EpisodeInfo(object):
 
         if self.text:
             self._process_page()
-    
+
     def _extract(self, pattern):
         '''returns list of strings or empty list'''
         found = re.findall(pattern, self.text)
         data = []
-        if found:        
+        if found:
             items = re.findall(ur'\[\[(.*?)\]\]', ''.join(found))
 
             for item in items:
@@ -62,7 +64,6 @@ class EpisodeInfo(object):
                 data.append(item)
         return data
 
-    
     def _process_page(self):
         '''Extract info from page'''
         # get gm
@@ -84,7 +85,6 @@ class EpisodeInfo(object):
     def _make_links(self, data):
         links = ']]<br />\n[['.join(data)
         return '[[%s]]' % links
-
 
     def get_gm(self, link=False, default=True):
         logger.debug('Return GM')
