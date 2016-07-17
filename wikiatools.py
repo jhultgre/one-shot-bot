@@ -90,3 +90,14 @@ def add_text_command(page, text, exception):
     logger.info('adding text to page ' + page)
     logger.debug(command)
     return command
+
+
+def move_page(page, destination):
+    logger.info("moveing page:{0} to {1}".format(page, destination))
+    command = 'python pwb.py movepages -from:"{0}"" -to:"{1}" -always -summary:"{2} This page was moved by a droid"'
+    run_command(command.format(page, destination, get_boop()))
+
+
+def replace(old, new, options):
+    command = 'python pwb.py replace "{0}" "{1}" -always -summary:"{2} This edit was done by a droid" {3}'
+    run_command(command.format(old, new, get_boop(), options))
