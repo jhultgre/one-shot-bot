@@ -101,8 +101,7 @@ for ep in os.listdir(episodes_path):
                        from episodes, performers
                        where episodes.episode=?
                        and performers.name=?;
-                       ''',
-                       [(episode, n) for n in names])
+                       ''', [(episode, n) for n in names])
     conn.commit()
 
     # setup series
@@ -230,6 +229,7 @@ for name in sorted(s[0] for s in cursor.fetchall()):
                    and series_eps.eid=episodes.eid
                    and series.series_name=?;
                    ''', (name,))
+
     for ep in [e[0] for e in cursor.fetchall()]:
         if ep in titles:
             links.append(ep + '|' + titles[ep])
@@ -249,6 +249,7 @@ for name in sorted(s[0] for s in cursor.fetchall()):
                    and ep_perfs.id=performers.id
                    and series.series_name=?;
                    ''', (name,))
+
     for p in sorted([n[0] for n in cursor.fetchall()]):
         player_contents += '\n* [[%s]]' % p
     logger.debug(player_contents)

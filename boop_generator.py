@@ -46,6 +46,7 @@ def get_boop():
             '*Squidily-Squeak*',
             'Roger-Roger',
             ]
+
     if random.randrange(11) >= 10:
         boop = random.choice(woops)
     elif random.randrange(111) >= 110:
