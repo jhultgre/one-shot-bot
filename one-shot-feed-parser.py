@@ -172,7 +172,7 @@ def get_episodes(feed):
                     commands.append(wikiatools.update_episode_list('Campaign:Campaign', episode, title, link))
                     commands.append(wikiatools.update_episode_list('Campaign:Chronology', episode, title))
                     wikiatools.write_page('Campaign:' + split_title[0] + 'Episode ' + str(number), '#REDIRECT [[%s]]' % episode)
-                except Exception, e:
+                except Exception:
                     logger.debug('bad number')
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
@@ -188,7 +188,7 @@ def get_episodes(feed):
                     number = int(split_title[0])
                     prev_episode = '[[Critical Success %s]]' % (number - 1)
                     next_episode = '[[Critical Success %s]]' % (number + 1)
-                except Exception, e:
+                except Exception:
                     number = title
                     logger.debug('bad number')
                     prev_episode = 'Previous Episode'
