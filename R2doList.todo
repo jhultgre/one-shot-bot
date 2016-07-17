@@ -1,0 +1,11 @@
+ Rss Feeds:
+ ☐ get full blurb
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+Archive:
+ ✔ update performer episodes to use pagetools system @done (16-07-13 20:48)
+ ✔ reduce downloaded pages durring maintanice script @done (16-07-13 20:48)
+ ✔ only replace pages if changes @done (16-07-13 20:48)
+ ✔ cleanup ntmtp formating @done (16-07-13 20:48)
+ ✔ move ttt guest check to backstory system @done (16-07-13 20:47)
+ ✔ check if previous ep exists and grab preformers, gm, series, and system. @done (16-07-13 20:47)
