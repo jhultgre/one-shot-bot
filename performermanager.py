@@ -286,7 +286,7 @@ for name in sorted(s[0] for s in cursor.fetchall()):
                 commands.append(add_appearences_command % (name, contents, get_boop()))
             # series performers
             if 'Players' in page:
-                updated_page = re.sub(player_re, contents, page)
+                updated_page = re.sub(player_re, player_contents, page)
 
                 if page != updated_page:
                     logger.info('updating players ' + name)
