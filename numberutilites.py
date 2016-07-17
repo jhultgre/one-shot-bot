@@ -20,9 +20,9 @@ def text_to_number(textnum, numwords={}):
     logger.debug('text to number')
     if not numwords:
         units = [
-        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-        "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-        "sixteen", "seventeen", "eighteen", "nineteen",
+            "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+            "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+            "sixteen", "seventeen", "eighteen", "nineteen",
         ]
 
         tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
@@ -30,9 +30,12 @@ def text_to_number(textnum, numwords={}):
         scales = ["hundred", "thousand", "million", "billion", "trillion"]
 
         numwords["and"] = (1, 0)
-        for idx, word in enumerate(units):    numwords[word] = (1, idx)
-        for idx, word in enumerate(tens):     numwords[word] = (1, idx * 10)
-        for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
+        for idx, word in enumerate(units):
+            numwords[word] = (1, idx)
+        for idx, word in enumerate(tens):
+            numwords[word] = (1, idx * 10)
+        for idx, word in enumerate(scales):
+            numwords[word] = (10 ** (idx * 3 or 2), 0)
 
     current = result = 0
     textnum = textnum.lower()

@@ -5,47 +5,47 @@ logger = logging.getLogger(__name__)
 
 def get_boop():
     beeps = [
-            'Beep',
-            'Bleep',
-            'Whhirrrrr',
-            'Ba-Da',
-            'WooOOt',
-            'Beedely',
-            'Boop-Ba',
-            'Tick',
-            'Ping',
-            'Boop',
-            'Cheep',
-            'Tweep',
-            ]
+        'Beep',
+        'Bleep',
+        'Whhirrrrr',
+        'Ba-Da',
+        'WooOOt',
+        'Beedely',
+        'Boop-Ba',
+        'Tick',
+        'Ping',
+        'Boop',
+        'Cheep',
+        'Tweep',
+    ]
 
     boops = [
-            'Boop',
-            'Bloo-Bloo',
-            'Bloo',
-            'Bloop',
-            'Ding',
-            'Beep',
-            'Bleep',
-            'Doop',
-            'Bing',
-            'Tock',
-            'Bonk',
-            'Tick',
-            'Chirp',
-            'Twirp',
-            ]
+        'Boop',
+        'Bloo-Bloo',
+        'Bloo',
+        'Bloop',
+        'Ding',
+        'Beep',
+        'Bleep',
+        'Doop',
+        'Bing',
+        'Tock',
+        'Bonk',
+        'Tick',
+        'Chirp',
+        'Twirp',
+    ]
 
     woops = [
-            'WhaaaaooOOOoo',
-            '*Lighter-Thumbs-Up*',
-            'ZzzzzzaaaAP',
-            '*Happy-Whistle*',
-            '*Sad-Tweep*',
-            '*Sarcastic-Chirping*',
-            '*Squidily-Squeak*',
-            'Roger-Roger',
-            ]
+        'WhaaaaooOOOoo',
+        '*Lighter-Thumbs-Up*',
+        'ZzzzzzaaaAP',
+        '*Happy-Whistle*',
+        '*Sad-Tweep*',
+        '*Sarcastic-Chirping*',
+        '*Squidily-Squeak*',
+        'Roger-Roger',
+    ]
 
     if random.randrange(11) >= 10:
         boop = random.choice(woops)
