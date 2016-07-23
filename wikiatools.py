@@ -86,7 +86,12 @@ def add_text_command(page, text, exception):
                '-text:"{1}" '
                '-except:"{2}" '
                '-summary:"{3} This edit was done by a droid" -always')
+    text = escape_quotes(text)
     command = command.format(page, text, exception, get_boop())
     logger.info('adding text to page ' + page)
     logger.debug(command)
     return command
+
+
+def escape_quotes(text):
+    return text.replace('"',r'\"')
