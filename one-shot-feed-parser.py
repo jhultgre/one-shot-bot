@@ -116,7 +116,7 @@ def get_episodes(feed):
         logger.info(desc)
         logger.info(link)
         logger.info(podcast)
-        desc = desc + '\n\n[%s Listen!]' % link
+        desc += '\n\n[%s Listen!]' % link
         # format to correct url based on podcast
         # ONE-SHOT
         if podcast == 'one-shot' or any(t.term == 'One Shot' for t in f.tags):
@@ -145,7 +145,7 @@ def get_episodes(feed):
                     episode = title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
                     prev_info = EpisodeInfo('FakeEp')
 
                 template = template.replace('$gm', prev_info.get_gm(True))
@@ -176,7 +176,7 @@ def get_episodes(feed):
                     logger.debug('bad number')
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
         # CRITICAL SUCCESS
         elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
             with open('templates/critical-success.template') as f:
@@ -193,7 +193,7 @@ def get_episodes(feed):
                     logger.debug('bad number')
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
 
                 episode = 'Critical Success %s' % number
         # First WATCH
@@ -218,7 +218,7 @@ def get_episodes(feed):
                     next_episode = '[[First Watch %s]]' % (number + 1)
                     episode = 'First Watch %s' % number
                     commands.append(wikiatools.update_episode_list('First Watch', episode, ' %s: %s' % (episode, title), link, '-first-watch'))
-                # desc = desc +'\n[[Category:Kill All Episodes]]'
+                # desc += '\n[[Category:Kill All Episodes]]'
 
             logger.debug(template)
 
@@ -242,7 +242,7 @@ def get_episodes(feed):
                     number = title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
 
                 if guest:
                     template = template.replace('$guest', '[[%s]]' % guest)
@@ -277,7 +277,7 @@ def get_episodes(feed):
                     number = title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
 
                 logger.debug(template)
 
@@ -312,7 +312,7 @@ def get_episodes(feed):
                     episode = 'Talking TableTop %s' % title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
 
                 template = template.replace('$guest', guest)
         else:

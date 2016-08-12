@@ -118,7 +118,7 @@ def get_episodes(feed):
             continue
         # episode post
         if 'episode' in title.lower():
-            desc = desc + '\n\n[%s Listen!]' % link
+            desc += '\n\n[%s Listen!]' % link
             with open('templates/ntmtp.template') as f:
                 template = f.read()
 

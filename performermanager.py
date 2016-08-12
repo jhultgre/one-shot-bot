@@ -56,8 +56,8 @@ titles_re = r'(?:\* \[\[)(.*)(?:\|)(.*)(?:\]\])'
 episodes_command = 'python pwb.py listpages -cat:"Episodes" -namespace:0 -save:"../one-shot-bot/test_files/episodes"'
 get_command = 'python pwb.py listpages -file:"userfiles/{0}" -save:"../one-shot-bot/test_files/{0}/"'
 if not clean:
-    episodes_command = episodes_command + ' -recentchanges:100 -intersect'
-    get_command = get_command + ' -recentchanges:100 -intersect'
+    episodes_command += ' -recentchanges:100 -intersect'
+    get_command += ' -recentchanges:100 -intersect'
 
 add_appearences_command = 'python pwb.py add_text -page:"%s" -text:"%s" -summary:"%s Links added by a droid" -always'
 replace_appearences_command = 'python pwb.py replace -page:"%s" -regex "' + appearences_re + '" "%s" -summary:"%s Updating episodes was done by a droid" -always'

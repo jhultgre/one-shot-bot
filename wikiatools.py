@@ -54,7 +54,7 @@ def run_command(text):
     logger.info('running command:' + text)
     if "-summary" not in text:
         logger.info('adding summary')
-        text = text + ' -summary:"%s This edit was done by a droid"' % get_boop()
+        text += ' -summary:"%s This edit was done by a droid"' % get_boop()
     os.chdir('../core/')
     os.system(text)
     os.chdir('../one-shot-bot/')
@@ -94,4 +94,4 @@ def add_text_command(page, text, exception):
 
 
 def escape_quotes(text):
-    return text.replace('"',r'\"')
+    return text.replace('"', r'\"')

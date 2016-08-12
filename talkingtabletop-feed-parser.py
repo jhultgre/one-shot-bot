@@ -102,7 +102,7 @@ def get_episodes(feed, podcast):
 
         if podcast == 'ttt':
             link = 'http://talkingtabletop.net/talking-tabletop/%s/' % link
-            desc = desc + '\n\n[%s Listen!]' % link
+            desc += '\n\n[%s Listen!]' % link
             with open('templates/talking-tabletop.template') as f:
                 template = f.read()
                 if number:
@@ -114,7 +114,7 @@ def get_episodes(feed, podcast):
                     episode = 'Talking TableTop %s' % title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
 
                 if 'with' in title:
                     guest = '[[%s]]' % title.split('with')[1].strip()
@@ -124,7 +124,7 @@ def get_episodes(feed, podcast):
 
         elif podcast == 'heros':
             link = 'http://talkingtabletop.net/heros-journey/%s/' % link
-            desc = desc + '\n\n[%s Listen!]' % link
+            desc += '\n\n[%s Listen!]' % link
             with open('templates/heros-journey.template') as f:
                 template = f.read()
                 if number:
@@ -136,7 +136,7 @@ def get_episodes(feed, podcast):
                     episode = 'Hero\'s Journey %s' % title
                     prev_episode = 'Previous Episode'
                     next_episode = 'Next Episode'
-                    desc = desc + '\n[[Category:Kill All Episodes]]'
+                    desc += '\n[[Category:Kill All Episodes]]'
 
                 if 'Emily' in title:
                     guest = '[[Emily]]'
@@ -149,4 +149,3 @@ def get_episodes(feed, podcast):
 
 if __name__ == '__main__':
     main()
-    
