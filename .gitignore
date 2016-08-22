@@ -14,3 +14,7 @@ logs
 *.db
 
 testx.py
+
+*.sublime-project
+
+*.sublime-workspace
