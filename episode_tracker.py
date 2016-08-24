@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class EpisodeManager(object):
+
     """Keeps track of the episdoe number of complicated episode feeds"""
+
     def __init__(self, podcast, offset=0):
         super(EpisodeManager, self).__init__()
         logger.info('creating episode manger for %s' % podcast)
@@ -51,3 +53,12 @@ class EpisodeManager(object):
 
     def get_episode_number(self, guid):
         return self.data[guid]['number']
+
+
+# def main():
+#     with EpisodeManager('oneshot-bonus', 6) as em:
+#         pass
+
+
+# if __name__ == '__main__':
+#     main()

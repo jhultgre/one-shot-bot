@@ -128,25 +128,42 @@ def get_episodes(feed):
                     number = int(re.findall(r'^(\d+)[.:;]', title)[0])
                 except:
                     number = None
-                ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)[0]
-                if number:
-                    part = re.findall(r'(?:[Pp]art )(\d+)', ep_title)
-                    if part and int(part[0]) > 1:
-                        prev_info = EpisodeInfo('Episode %s' % (number - 1))
-                    else:
-                        prev_info = EpisodeInfo('FakeEp')
+                if 'BONUS' in title:
+                    logger.debug(title)
+                ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)
+                if 'BONUS' in title:
+                    logger.debug(ep_title)
+                if ep_title:
+                    ep_title = ep_title[0]
+                    if number:
+                        part = re.findall(r'(?:[Pp]art )(\d+)', ep_title)
+                        if part and int(part[0]) > 1:
+                            prev_info = EpisodeInfo('Episode %s' % (number - 1))
+                        else:
+                            prev_info = EpisodeInfo('FakeEp')
 
-                    episode = 'Episode %s' % number
-                    prev_episode = '[[Episode %s|One Shot Episode %s]]' % (number - 1, number - 1)
-                    next_episode = '[[Episode %s|One Shot Episode %s]]' % (number + 1, number + 1)
-                    if ep_title:
-                        commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Episode %s: %s' % (number, ep_title), link))
+                        episode = 'Episode %s' % number
+                        prev_episode = '[[Episode %s|One Shot Episode %s]]' % (number - 1, number - 1)
+                        next_episode = '[[Episode %s|One Shot Episode %s]]' % (number + 1, number + 1)
+                        if ep_title:
+                            commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Episode %s: %s' % (number, ep_title), link))
+                    else:
+                        episode = title
+                        prev_episode = 'Previous Episode'
+                        next_episode = 'Next Episode'
+                        desc += '\n[[Category:Kill All Episodes]]'
+                        prev_info = EpisodeInfo('FakeEp')
                 else:
-                    episode = title
-                    prev_episode = 'Previous Episode'
-                    next_episode = 'Next Episode'
-                    desc += '\n[[Category:Kill All Episodes]]'
-                    prev_info = EpisodeInfo('FakeEp')
+                    if 'BONUS' in title:
+                        if 'BONUS' in title:
+                            logger.debug('in bonus block')
+                        with EpisodeManager('oneshot-bonus') as em:
+                            em.add_episode(title, guid)
+                            number = em.get_episode_number(guid)
+                            prev_episode = '[[Episode BONUS %s]]' % (number - 1)
+                            next_episode = '[[Episode BONUS %s]]' % (number + 1)
+                            episode = 'Episode BONUS %s' % number
+                            commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Bonus Episode %s: %s' % (number, title), link))
 
                 template = template.replace('$gm', prev_info.get_gm(True))
                 template = template.replace('$players', prev_info.get_players(True))
@@ -221,7 +238,6 @@ def get_episodes(feed):
                 # desc += '\n[[Category:Kill All Episodes]]'
 
             logger.debug(template)
-
         # BACKSTORY
         elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
             try:
