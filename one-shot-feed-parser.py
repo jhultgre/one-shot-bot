@@ -155,8 +155,10 @@ def get_episodes(feed):
                         prev_info = EpisodeInfo('FakeEp')
                 else:
                     if 'BONUS' in title:
-                        if 'BONUS' in title:
-                            logger.debug('in bonus block')
+                        logger.debug('in bonus block')
+
+                        prev_info = EpisodeInfo('FakeEp')
+
                         with EpisodeManager('oneshot-bonus') as em:
                             em.add_episode(title, guid)
                             number = em.get_episode_number(guid)
