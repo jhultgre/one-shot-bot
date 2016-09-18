@@ -15,6 +15,4 @@ logs
 
 testx.py
 
-*.sublime-project
-
 *.sublime-workspace
