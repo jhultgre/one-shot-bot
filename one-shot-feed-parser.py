@@ -218,7 +218,7 @@ def get_episodes(feed):
         # First WATCH
         elif podcast == 'first-watch' or any(t.term == 'First Watch' for t in f.tags):
             if 'Second' in title:
-                with open('templates/first-watch.template') as f:
+                with open('templates/second-watch.template') as f:
                     template = f.read()
                 with EpisodeManager('second-watch') as em:
                     em.add_episode(title, guid)
