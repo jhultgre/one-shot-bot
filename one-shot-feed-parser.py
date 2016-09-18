@@ -118,159 +118,163 @@ def get_episodes(feed):
         logger.info(podcast)
         desc += '\n\n[%s Listen!]' % link
         # format to correct url based on podcast
+        template_keys = {}
+
         # ONE-SHOT
         if podcast == 'one-shot' or any(t.term == 'One Shot' for t in f.tags):
 
-            with open('templates/one-shot.template') as f:
-                template = f.read()
+            template = 'templates/one-shot.template'
 
-                try:
-                    number = int(re.findall(r'^(\d+)[.:;]', title)[0])
-                except:
-                    number = None
-                if 'BONUS' in title:
-                    logger.debug(title)
-                ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)
-                if 'BONUS' in title:
-                    logger.debug(ep_title)
-                if ep_title:
-                    ep_title = ep_title[0]
-                    if number:
-                        part = re.findall(r'(?:[Pp]art )(\d+)', ep_title)
-                        if part and int(part[0]) > 1:
-                            prev_info = EpisodeInfo('Episode %s' % (number - 1))
-                        else:
-                            prev_info = EpisodeInfo('FakeEp')
-
-                        episode = 'Episode %s' % number
-                        prev_episode = '[[Episode %s|One Shot Episode %s]]' % (number - 1, number - 1)
-                        next_episode = '[[Episode %s|One Shot Episode %s]]' % (number + 1, number + 1)
-                        if ep_title:
-                            commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Episode %s: %s' % (number, ep_title), link))
+            try:
+                number = int(re.findall(r'^(\d+)[.:;]', title)[0])
+            except:
+                number = None
+            # if 'BONUS' in title:
+            #     logger.debug(title)
+            ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)
+            # if 'BONUS' in title:
+            #     logger.debug(ep_title)
+            if ep_title:
+                ep_title = ep_title[0]
+                if number:
+                    part = re.findall(r'(?:[Pp]art )(\d+)', ep_title)
+                    if part and int(part[0]) > 1:
+                        prev_info = EpisodeInfo('Episode %s' % (number - 1))
                     else:
-                        episode = title
-                        prev_episode = 'Previous Episode'
-                        next_episode = 'Next Episode'
-                        desc += '\n[[Category:Kill All Episodes]]'
                         prev_info = EpisodeInfo('FakeEp')
+
+                    episode = 'Episode %s' % number
+                    template_keys['$prev'] = '[[Episode %s|One Shot Episode %s]]' % (number - 1, number - 1)
+                    template_keys['$next'] = '[[Episode %s|One Shot Episode %s]]' % (number + 1, number + 1)
+                    if ep_title:
+                        commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Episode %s: %s' % (number, ep_title), link))
                 else:
-                    if 'BONUS' in title:
-                        logger.debug('in bonus block')
+                    episode = title
+                    template_keys['$prev'] = 'Previous Episode'
+                    template_keys['$next'] = 'Next Episode'
+                    desc += '\n[[Category:Kill All Episodes]]'
+                    prev_info = EpisodeInfo('FakeEp')
+            else:
+                if 'BONUS' in title:
+                    logger.debug('in bonus block')
 
-                        prev_info = EpisodeInfo('FakeEp')
+                    prev_info = EpisodeInfo('FakeEp')
 
-                        with EpisodeManager('oneshot-bonus') as em:
-                            em.add_episode(title, guid)
-                            number = em.get_episode_number(guid)
-                            prev_episode = '[[Episode BONUS %s]]' % (number - 1)
-                            next_episode = '[[Episode BONUS %s]]' % (number + 1)
-                            episode = 'Episode BONUS %s' % number
-                            commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Bonus Episode %s: %s' % (number, title), link))
+                    with EpisodeManager('oneshot-bonus') as em:
+                        em.add_episode(title, guid)
+                        number = em.get_episode_number(guid)
+                        template_keys['$prev'] = '[[Episode BONUS %s]]' % (number - 1)
+                        template_keys['$next'] = '[[Episode BONUS %s]]' % (number + 1)
+                        episode = 'Episode BONUS %s' % number
+                        commands.append(wikiatools.update_episode_list('One Shot', episode, 'One Shot Bonus Episode %s: %s' % (number, title), link))
 
-                template = template.replace('$gm', prev_info.get_gm(True))
-                template = template.replace('$players', prev_info.get_players(True))
-                template = template.replace('$system', prev_info.get_system(True))
-                template = template.replace('$series', prev_info.get_series(True))
+            template_keys['$gm'] = prev_info.get_gm(True)
+            template_keys['$players'] = prev_info.get_players(True)
+            template_keys['$system'] = prev_info.get_system(True)
+            template_keys['$series'] = prev_info.get_series(True)
 
-                logger.info('Episode: ' + episode)
+            logger.info('Episode: ' + episode)
+
         # CAMPAIGN
         elif podcast == 'campaign' or any(t.term == 'Campaign' for t in f.tags):
-            with open('templates/campaign.template') as f:
-                template = f.read()
-                # episode = title
-                title = title.replace(':', '')
-                split_title = title.split('Episode')
-                logger.debug('Title number: %s', str(split_title))
+            template = 'templates/campaign.template'
 
-                episode = 'Campaign:' + title
+            title = title.replace(':', '')
+            split_title = title.split('Episode')
+            logger.debug('Title number: %s', str(split_title))
 
-                try:
-                    number = num_utils.text_to_number(split_title[1])
-                    prev_episode = split_title[0] + 'Episode ' + num_utils.number_to_text(number - 1)
-                    next_episode = split_title[0] + 'Episode ' + num_utils.number_to_text(number + 1)
-                    commands.append(wikiatools.update_episode_list('Campaign:Campaign', episode, title, link))
-                    commands.append(wikiatools.update_episode_list('Campaign:Chronology', episode, title))
-                    wikiatools.write_page('Campaign:' + split_title[0] + 'Episode ' + str(number), '#REDIRECT [[%s]]' % episode)
-                except Exception:
-                    logger.debug('bad number')
-                    prev_episode = 'Previous Episode'
-                    next_episode = 'Next Episode'
-                    desc += '\n[[Category:Kill All Episodes]]'
+            episode = 'Campaign:' + title
+
+            try:
+                number = num_utils.text_to_number(split_title[1])
+                template_keys['$prev'] = split_title[0] + 'Episode ' + num_utils.number_to_text(number - 1)
+                template_keys['$next'] = split_title[0] + 'Episode ' + num_utils.number_to_text(number + 1)
+                commands.append(wikiatools.update_episode_list('Campaign:Campaign', episode, title, link))
+                commands.append(wikiatools.update_episode_list('Campaign:Chronology', episode, title))
+                wikiatools.write_page('Campaign:' + split_title[0] + 'Episode ' + str(number), '#REDIRECT [[%s]]' % episode)
+            except Exception:
+                logger.debug('bad number')
+                template_keys['$prev'] = 'Previous Episode'
+                template_keys['$next'] = 'Next Episode'
+                desc += '\n[[Category:Kill All Episodes]]'
+
         # CRITICAL SUCCESS
         elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
-            with open('templates/critical-success.template') as f:
-                template = f.read()
-                split_title = title.split('.')
-                logger.debug('Title number: %s', str(split_title))
+            template = 'templates/critical-success.template'
 
-                try:
-                    number = int(split_title[0])
-                    prev_episode = '[[Critical Success %s]]' % (number - 1)
-                    next_episode = '[[Critical Success %s]]' % (number + 1)
-                except Exception:
-                    number = title
-                    logger.debug('bad number')
-                    prev_episode = 'Previous Episode'
-                    next_episode = 'Next Episode'
-                    desc += '\n[[Category:Kill All Episodes]]'
+            split_title = title.split('.')
+            logger.debug('Title number: %s', str(split_title))
 
-                episode = 'Critical Success %s' % number
+            try:
+                number = int(split_title[0])
+                template_keys['$prev'] = '[[Critical Success %s]]' % (number - 1)
+                template_keys['$next'] = '[[Critical Success %s]]' % (number + 1)
+            except Exception:
+                number = title
+                logger.debug('bad number')
+                template_keys['$prev'] = 'Previous Episode'
+                template_keys['$next'] = 'Next Episode'
+                desc += '\n[[Category:Kill All Episodes]]'
+
+            episode = 'Critical Success %s' % number
+
         # First WATCH
         elif podcast == 'first-watch' or any(t.term == 'First Watch' for t in f.tags):
             if 'Second' in title:
-                with open('templates/second-watch.template') as f:
-                    template = f.read()
+                template = 'templates/second-watch.template'
+
                 with EpisodeManager('second-watch') as em:
                     em.add_episode(title, guid)
+
                     number = em.get_episode_number(guid)
-                    prev_episode = '[[Second Watch %s]]' % (number - 1)
-                    next_episode = '[[Second Watch %s]]' % (number + 1)
+                    template_keys['$prev'] = '[[Second Watch %s]]' % (number - 1)
+                    template_keys['$next'] = '[[Second Watch %s]]' % (number + 1)
                     episode = 'Second Watch %s' % number
                     commands.append(wikiatools.update_episode_list('First Watch', episode, ' %s: %s' % (episode, title), link, '-second-watch'))
             else:
-                with open('templates/first-watch.template') as f:
-                    template = f.read()
+                template = 'templates/first-watch.template'
+
                 with EpisodeManager('first-watch') as em:
                     em.add_episode(title, guid)
                     number = em.get_episode_number(guid)
-                    prev_episode = '[[First Watch %s]]' % (number - 1)
-                    next_episode = '[[First Watch %s]]' % (number + 1)
+                    template_keys['$prev'] = '[[First Watch %s]]' % (number - 1)
+                    template_keys['$next'] = '[[First Watch %s]]' % (number + 1)
                     episode = 'First Watch %s' % number
                     commands.append(wikiatools.update_episode_list('First Watch', episode, ' %s: %s' % (episode, title), link, '-first-watch'))
-                # desc += '\n[[Category:Kill All Episodes]]'
 
-            logger.debug(template)
         # BACKSTORY
         elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
+            template = 'templates/backstory.template'
+
             try:
                 number = int(re.findall(r'^\d+', title)[0])
             except:
                 number = None
             guest = re.findall(r'[A-Za-z][A-Za-z\s-]*', title)[0]
             logger.info('guest: ' + guest)
-            with open('templates/backstory.template') as f:
-                template = f.read()
-                # setup database with episode numbers
-                if number:
-                    prev_episode = '[[Backstory %s]]' % (number - 1)
-                    next_episode = '[[Backstory %s]]' % (number + 1)
-                    if guest:
-                        commands.append(wikiatools.update_episode_list('Backstory', 'Backstory %s' % number, 'Backstory %s: %s' % (number, guest), link))
-                else:
-                    number = title
-                    prev_episode = 'Previous Episode'
-                    next_episode = 'Next Episode'
-                    desc += '\n[[Category:Kill All Episodes]]'
 
+            if number:
+                template_keys['$prev'] = '[[Backstory %s]]' % (number - 1)
+                template_keys['$next'] = '[[Backstory %s]]' % (number + 1)
                 if guest:
-                    template = template.replace('$guest', '[[%s]]' % guest)
-                else:
-                    template = template.replace('$guest', '')
-                logger.debug(template)
+                    commands.append(wikiatools.update_episode_list('Backstory', 'Backstory %s' % number, 'Backstory %s: %s' % (number, guest), link))
+            else:
+                number = title
+                template_keys['$prev'] = 'Previous Episode'
+                template_keys['$next'] = 'Next Episode'
+                desc += '\n[[Category:Kill All Episodes]]'
 
-                episode = 'Backstory %s' % number
+            if guest:
+                template_keys['$guest'] = '[[%s]]' % guest
+            else:
+                template_keys['$guest'] = ''
+
+            episode = 'Backstory %s' % number
+
         # MODIFIER
         elif podcast == 'modifier' or any(t.term == 'Modifier' for t in f.tags):
+            template = 'templates/modifier.template'
+
             if title[:1] == '#':
                 title = title[1:]
             try:
@@ -282,28 +286,26 @@ def get_episodes(feed):
                 guest = guest.replace(' and ', ']]<br />[[')
             else:
                 guest = ''
-            with open('templates/modifier.template') as f:
-                template = f.read()
-                # setup database with episode numbers
 
-                if number:
-                    title = re.findall(r'\d[.:;]\s(.*)', title)[0]
-                    prev_episode = '[[Modifier %s]]' % (number - 1)
-                    next_episode = '[[Modifier %s]]' % (number + 1)
-                    commands.append(wikiatools.update_episode_list('Modifier', 'Modifier %s' % number, 'Modifier %s: %s' % (number, title), link))
-                else:
-                    number = title
-                    prev_episode = 'Previous Episode'
-                    next_episode = 'Next Episode'
-                    desc += '\n[[Category:Kill All Episodes]]'
+            if number:
+                title = re.findall(r'\d[.:;]\s(.*)', title)[0]
+                template_keys['$prev'] = '[[Modifier %s]]' % (number - 1)
+                template_keys['$next'] = '[[Modifier %s]]' % (number + 1)
+                commands.append(wikiatools.update_episode_list('Modifier', 'Modifier %s' % number, 'Modifier %s: %s' % (number, title), link))
+            else:
+                number = title
+                template_keys['$prev'] = 'Previous Episode'
+                template_keys['$next'] = 'Next Episode'
+                desc += '\n[[Category:Kill All Episodes]]'
 
-                logger.debug(template)
+            template_keys['$guest'] = guest
 
-                template = template.replace('$guest', guest)
+            episode = 'Modifier %s' % number
 
-                episode = 'Modifier %s' % number
         # TALKING-TABLETOP
         elif podcast == 'talking-table-top' or any(t.term == 'Talking Table Top' for t in f.tags):
+            template = 'templates/talking-tabletop.template'
+
             try:
                 number = int(re.findall(r'\d+', title)[0])
             except:
@@ -312,35 +314,52 @@ def get_episodes(feed):
                 guest = '[[%s]]' % title.split('with')[1].strip()
             else:
                 guest = '[[%s]]' % re.findall(r'[A-Za-z][A-Za-z\s-]*', title)[0]
+
             guest = guest.replace(' and ', ']]<br />[[')
 
             logger.info('guest is %s', guest)
 
-            with open('templates/talking-tabletop.template') as f:
-                template = f.read()
-                if number:
-                    ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)[0]
-                    episode = 'Talking TableTop %s' % number
-                    prev_episode = '[[Talking TableTop %s]]' % (number - 1)
-                    next_episode = '[[Talking TableTop %s]]' % (number + 1)
-                    if ep_title:
-                        commands.append(wikiatools.update_episode_list('Talking TableTop', episode, 'Talking TableTop %03d: %s' % (number, ep_title), link))
+            if number:
+                ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)[0]
+                episode = 'Talking TableTop %s' % number
+                template_keys['$prev'] = '[[Talking TableTop %s]]' % (number - 1)
+                template_keys['$next'] = '[[Talking TableTop %s]]' % (number + 1)
+                if ep_title:
+                    commands.append(wikiatools.update_episode_list('Talking TableTop', episode, 'Talking TableTop %03d: %s' % (number, ep_title), link))
 
-                else:
-                    episode = 'Talking TableTop %s' % title
-                    prev_episode = 'Previous Episode'
-                    next_episode = 'Next Episode'
-                    desc += '\n[[Category:Kill All Episodes]]'
+            else:
+                episode = 'Talking TableTop %s' % title
+                template_keys['$prev'] = 'Previous Episode'
+                template_keys['$next'] = 'Next Episode'
+                desc += '\n[[Category:Kill All Episodes]]'
 
-                template = template.replace('$guest', guest)
+            template_keys['guest'] = guest
+
+        # UNKNOWN PODCAST
         else:
-            # unknown podcast
             logger.warning('UNKNOWN PODCAST: %s', podcast)
             continue
 
-        template = template.replace('$title', title).replace('$prev', prev_episode).replace('$next', next_episode)
+        template_keys['$title'] = title
+
+        template = fill_template(template, template_keys)
+
         logger.debug(template)
         wikiatools.write_page(title=episode, content=template + '\n' + desc)
     return commands
+
+
+def fill_template(template, values):
+    logger.debug('fill templates')
+    logger.debug(template)
+    logger.debug((values))
+    with open(template) as t:
+        template = t.read()
+
+    for k, v in values.iteritems():
+        template = template.replace(k, v)
+
+    return template
+
 
 main()
