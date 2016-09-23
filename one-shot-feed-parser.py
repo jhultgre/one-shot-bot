@@ -12,7 +12,7 @@ import wikiatools
 from pagetools import EpisodeInfo
 from episode_tracker import EpisodeManager
 
-DEBUG = False
+DEBUG = True
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -116,10 +116,13 @@ def get_episodes(feed):
         logger.info(desc)
         logger.info(link)
         logger.info(podcast)
-        desc += '\n\n[%s Listen!]' % link
-        # format to correct url based on podcast
-        template_keys = {}
 
+        desc += '\n\n[%s Listen!]' % link
+        template_keys = {}
+        template_keys['$desc'] = ''
+        template_keys['$cats'] = ''
+
+        # format to correct url based on podcast
         # ONE-SHOT
         if podcast == 'one-shot' or any(t.term == 'One Shot' for t in f.tags):
 
@@ -129,11 +132,9 @@ def get_episodes(feed):
                 number = int(re.findall(r'^(\d+)[.:;]', title)[0])
             except:
                 number = None
-            # if 'BONUS' in title:
-            #     logger.debug(title)
+
             ep_title = re.findall(r'(?:^\d+[.:;]\s?)(.*)', title)
-            # if 'BONUS' in title:
-            #     logger.debug(ep_title)
+
             if ep_title:
                 ep_title = ep_title[0]
                 if number:
