@@ -104,13 +104,21 @@ def get_episodes(feed):
 
         # CAMPAIGN
         elif podcast == 'campaign' or any(t.term == 'Campaign' for t in f.tags):
-            continue
+            feed_episode = episodeparsers.CampaignParser(f)
+            feed_episode.parse_episode()
+
+            commands.extend(feed_episode.commands)
+
+            print feed_episode.wiki_content()
 
         # CRITICAL SUCCESS
         elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
-            critical_success_ep = episodeparsers.CriticalSuccessParser(f)
-            critical_success_ep.parse_episode()
-            print critical_success_ep.wiki_content()
+            feed_episode = episodeparsers.CriticalSuccessParser(f)
+            feed_episode.parse_episode()
+
+            commands.extend(feed_episode.commands)
+
+            print feed_episode.wiki_content()
 
         # First WATCH
         elif podcast == 'first-watch' or any(t.term == 'First Watch' for t in f.tags):
@@ -118,33 +126,37 @@ def get_episodes(feed):
 
         # BACKSTORY
         elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
-            backstory_ep = episodeparsers.BackstoryParser(f)
-            backstory_ep.parse_episode()
-            print backstory_ep.wiki_content()
+            feed_episode = episodeparsers.BackstoryParser(f)
+            feed_episode.parse_episode()
+
+            commands.extend(feed_episode.commands)
+
+            print feed_episode.wiki_content()
 
         # MODIFIER
         elif podcast == 'modifier' or any(t.term == 'Modifier' for t in f.tags):
-            modifier_ep = episodeparsers.ModifierParser(f)
-            modifier_ep.parse_episode()
-            print modifier_ep.wiki_content()
+            feed_episode = episodeparsers.ModifierParser(f)
+            feed_episode.parse_episode()
+
+            commands.extend(feed_episode.commands)
+
+            print feed_episode.wiki_content()
 
         # TALKING-TABLETOP
         elif podcast == 'talking-table-top' or any(t.term == 'Talking Table Top' for t in f.tags):
-            ttt_ep = episodeparsers.TalkingTableTopParser(f)
-            ttt_ep.parse_episode()
-            print ttt_ep.wiki_content()
+            feed_episode = episodeparsers.TalkingTableTopParser(f)
+            feed_episode.parse_episode()
+
+            commands.extend(feed_episode.commands)
+
+            print feed_episode.wiki_content()
 
         # UNKNOWN PODCAST
         else:
             logger.warning('UNKNOWN PODCAST: %s', podcast)
             continue
 
-        # template_keys['$title'] = title
-
-        # template = fill_template(template, template_keys)
-
-        # logger.debug(template)
-        # wikiatools.write_page(title=episode, content=template + '\n' + desc)
+        # wikiatools.write_page(title=feed_episode.wiki_page, content=feed_episode.wiki_content())
     return commands
 
 

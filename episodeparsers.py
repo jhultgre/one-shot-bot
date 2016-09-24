@@ -28,7 +28,7 @@ class Parser(object):
 
         self.values = defaultdict(lambda: '')
 
-        self.values['title'] = f.title
+        self.values['$title'] = f.title
         self.guid = f.guid
 
         if 'content' in f and 'value' in f.content[0]:
@@ -53,7 +53,7 @@ class Parser(object):
         podcast = f.links[0].href.split('.com/podcasts/')[1].split('/')[0]
 
         logger.info('==========')
-        logger.info(self.values['title'])
+        logger.info(self.values['$title'])
         logger.info(desc)
         logger.info(f.link)
         logger.info(podcast)
@@ -61,14 +61,14 @@ class Parser(object):
     # get the basics
     def parse_episode(self):
         # get number and episode title
-        title = self.values['title']
+        title = self.values['$title']
 
         try:
             number = int(re.findall(r'^\d+', title)[0])
         except:
             number = None
 
-        self.base_title = re.findall(r'^(?:\d*\.)?\s*(.*)', title)[0]
+        self.base_title = re.findall(r'^(?:\d*[.:;!])?\s*(.*)', title)[0]
 
         logger.info('base_title: ' + self.base_title)
 
@@ -86,10 +86,15 @@ class Parser(object):
             self.values['$prev'] = '[[{podcast} {num}]]'.format(podcast=self.podcast, num=number - 1)
             self.values['$next'] = '[[{podcast} {num}]]'.format(podcast=self.podcast, num=number + 1)
         else:
-            self.wiki_page = '{podcast} {title}'.format(podcast=self.podcast, title=title)
-            self.values['$prev'] = 'Previous Episode'
-            self.values['$next'] = 'Next Episode'
-            self.values['$cats'] += '[[Category:Kill All Episodes]]'
+            self.generic_links()
+
+    def generic_links(self):
+        if not self.wiki_page:
+            self.wiki_page = '{podcast} {title}'.format(podcast=self.podcast, title=self.values['$title'])
+
+        self.values['$prev'] = 'Previous Episode'
+        self.values['$next'] = 'Next Episode'
+        self.values['$cats'] += '[[Category:Kill All Episodes]]'
 
     # return the template
     def wiki_content(self):
@@ -199,3 +204,39 @@ class CriticalSuccessParser(Parser):
         guest = guest.replace(' and ', ']]<br />[[')
 
         self.values['$guest'] = guest
+
+
+class CampaignParser(Parser):
+
+    """docstring for CampaignParser"""
+
+    def __init__(self, f):
+        super(CampaignParser, self).__init__(f)
+        self.podcast = 'Campaign'
+        self.template_name = 'templates/campaign.template'
+
+    def parse_episode(self):
+
+        title = self.values['$title'].replace(':', '')
+        self.values['$title'] = title
+
+        title_parts = title.split('Episode')
+        logger.debug('Title number: %s', str(title_parts))
+
+        self.wiki_page = 'Campaign:' + title
+
+        try:
+            number = num_utils.text_to_number(title_parts[1])
+            self.values['$prev'] = title_parts[0] + 'Episode ' + num_utils.number_to_text(number - 1)
+            self.values['$next'] = title_parts[0] + 'Episode ' + num_utils.number_to_text(number + 1)
+
+            # update page lists
+            self.commands.append(wikiatools.update_episode_list('Campaign:Campaign', self.wiki_page, title, self.link))
+            self.commands.append(wikiatools.update_episode_list('Campaign:Chronology', self.wiki_page, title))
+
+            wikiatools.write_page('Campaign:{}Episode {}'.format(title_parts[0], str(number)),
+                                  '#REDIRECT [[{}]]'.format(self.wiki_page))
+        except Exception:
+            logger.debug('bad number')
+
+            self.generic_links()
