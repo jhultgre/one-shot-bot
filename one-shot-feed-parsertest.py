@@ -108,7 +108,9 @@ def get_episodes(feed):
 
         # CRITICAL SUCCESS
         elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
-            continue
+            critical_success_ep = episodeparsers.CriticalSuccessParser(f)
+            critical_success_ep.parse_episode()
+            print critical_success_ep.wiki_content()
 
         # First WATCH
         elif podcast == 'first-watch' or any(t.term == 'First Watch' for t in f.tags):
@@ -116,7 +118,9 @@ def get_episodes(feed):
 
         # BACKSTORY
         elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
-            continue
+            backstory_ep = episodeparsers.BackstoryParser(f)
+            backstory_ep.parse_episode()
+            print backstory_ep.wiki_content()
 
         # MODIFIER
         elif podcast == 'modifier' or any(t.term == 'Modifier' for t in f.tags):
@@ -126,7 +130,9 @@ def get_episodes(feed):
 
         # TALKING-TABLETOP
         elif podcast == 'talking-table-top' or any(t.term == 'Talking Table Top' for t in f.tags):
-            continue
+            ttt_ep = episodeparsers.TalkingTableTopParser(f)
+            ttt_ep.parse_episode()
+            print ttt_ep.wiki_content()
 
         # UNKNOWN PODCAST
         else:

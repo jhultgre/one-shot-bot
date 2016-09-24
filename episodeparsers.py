@@ -68,7 +68,7 @@ class Parser(object):
         except:
             number = None
 
-        self.base_title = re.findall(r'[A-Za-z].*', title)[0]
+        self.base_title = re.findall(r'^(?:\d*\.)?\s*(.*)', title)[0]
 
         logger.info('base_title: ' + self.base_title)
 
@@ -111,6 +111,22 @@ class Parser(object):
         return template
 
 
+class BackstoryParser(Parser):
+
+    """docstring for BackstoryParser"""
+
+    def __init__(self, f):
+        super(BackstoryParser, self).__init__(f)
+        self.podcast = 'Backstory'
+        self.template_name = 'templates/backstory.template'
+
+    def parse_episode(self):
+
+        super(BackstoryParser, self).parse_episode()
+
+        self.values['$guest'] = '[[%s]]' % self.base_title
+
+
 class ModifierParser(Parser):
 
     """docstring for ModifierParser"""
@@ -124,12 +140,62 @@ class ModifierParser(Parser):
 
         super(ModifierParser, self).parse_episode()
 
-        guest = re.split(r'[Ww]ith', self.values['title'])
+        guest = re.split(r'[Ww]ith', self.base_title)
 
         if len(guest) > 1:
-            guest = '[[%s]]' % guest[1]
+            guest = '[[%s]]' % guest[1].strip()
             guest = guest.replace(' and ', ']]<br />[[')
         else:
             guest = ''
+
+        self.values['$guest'] = guest
+
+
+class TalkingTableTopParser(Parser):
+
+    """docstring for TalkingTableTopParser"""
+
+    def __init__(self, f):
+        super(TalkingTableTopParser, self).__init__(f)
+        self.podcast = 'Talking TableTop'
+        self.template_name = 'templates/talking-tabletop.template'
+
+    def parse_episode(self):
+
+        super(TalkingTableTopParser, self).parse_episode()
+
+        guest = re.split(r'[Ww]ith', self.base_title)
+
+        if len(guest) > 1:
+            guest = '[[%s]]' % guest[1].strip()
+        else:
+            guest = '[[%s]]' % self.base_title
+
+        guest = guest.replace(' and ', ']]<br />[[')
+
+        self.values['$guest'] = guest
+
+
+class CriticalSuccessParser(Parser):
+
+    """docstring for CriticalSuccessParser"""
+
+    def __init__(self, f):
+        super(CriticalSuccessParser, self).__init__(f)
+        self.podcast = 'Critical Success'
+        self.template_name = 'templates/critical-success.template'
+
+    def parse_episode(self):
+
+        super(CriticalSuccessParser, self).parse_episode()
+
+        guest = re.split(r'[Ww]ith', self.base_title)
+
+        if len(guest) > 1:
+            guest = '[[%s]]' % guest[1].strip()
+        else:
+            guest = ''
+
+        guest = guest.replace(' and ', ']]<br />[[')
 
         self.values['$guest'] = guest
