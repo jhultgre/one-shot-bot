@@ -48,7 +48,7 @@ logger = logging.getLogger('episode feed')
 def main():
     logger.info('Main')
     # ?paged=2 to go back pages
-    oneshot_rss = 'http://www.oneshotpodcast.com/feed/'
+    oneshot_rss = 'http://www.oneshotpodcast.com/feed/?paged=2'
 
     # clear episode file
     logger.info('clear episode file')
@@ -102,54 +102,59 @@ def get_episodes(feed):
         if podcast == 'one-shot' or any(t.term == 'One Shot' for t in f.tags):
             continue
 
-        # CAMPAIGN
-        elif podcast == 'campaign' or any(t.term == 'Campaign' for t in f.tags):
-            feed_episode = episodeparsers.CampaignParser(f)
-            feed_episode.parse_episode()
+        # # CAMPAIGN
+        # elif podcast == 'campaign' or any(t.term == 'Campaign' for t in f.tags):
+        #     feed_episode = episodeparsers.CampaignParser(f)
+        #     feed_episode.parse_episode()
 
-            commands.extend(feed_episode.commands)
+        #     commands.extend(feed_episode.commands)
 
-            print feed_episode.wiki_content()
-
-        # CRITICAL SUCCESS
-        elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
-            feed_episode = episodeparsers.CriticalSuccessParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            print feed_episode.wiki_content()
+        #     print feed_episode.wiki_content()
 
         # First WATCH
         elif podcast == 'first-watch' or any(t.term == 'First Watch' for t in f.tags):
-            continue
-
-        # BACKSTORY
-        elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
-            feed_episode = episodeparsers.BackstoryParser(f)
+            feed_episode = episodeparsers.FirstWatchParser(f)
             feed_episode.parse_episode()
 
             commands.extend(feed_episode.commands)
 
             print feed_episode.wiki_content()
 
-        # MODIFIER
-        elif podcast == 'modifier' or any(t.term == 'Modifier' for t in f.tags):
-            feed_episode = episodeparsers.ModifierParser(f)
-            feed_episode.parse_episode()
+        # # CRITICAL SUCCESS
+        # elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
+        #     feed_episode = episodeparsers.CriticalSuccessParser(f)
+        #     feed_episode.parse_episode()
 
-            commands.extend(feed_episode.commands)
+        #     commands.extend(feed_episode.commands)
 
-            print feed_episode.wiki_content()
+        #     print feed_episode.wiki_content()
 
-        # TALKING-TABLETOP
-        elif podcast == 'talking-table-top' or any(t.term == 'Talking Table Top' for t in f.tags):
-            feed_episode = episodeparsers.TalkingTableTopParser(f)
-            feed_episode.parse_episode()
+        # # BACKSTORY
+        # elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
+        #     feed_episode = episodeparsers.BackstoryParser(f)
+        #     feed_episode.parse_episode()
 
-            commands.extend(feed_episode.commands)
+        #     commands.extend(feed_episode.commands)
 
-            print feed_episode.wiki_content()
+        #     print feed_episode.wiki_content()
+
+        # # MODIFIER
+        # elif podcast == 'modifier' or any(t.term == 'Modifier' for t in f.tags):
+        #     feed_episode = episodeparsers.ModifierParser(f)
+        #     feed_episode.parse_episode()
+
+        #     commands.extend(feed_episode.commands)
+
+        #     print feed_episode.wiki_content()
+
+        # # TALKING-TABLETOP
+        # elif podcast == 'talking-table-top' or any(t.term == 'Talking Table Top' for t in f.tags):
+        #     feed_episode = episodeparsers.TalkingTableTopParser(f)
+        #     feed_episode.parse_episode()
+
+        #     commands.extend(feed_episode.commands)
+
+        #     print feed_episode.wiki_content()
 
         # UNKNOWN PODCAST
         else:
