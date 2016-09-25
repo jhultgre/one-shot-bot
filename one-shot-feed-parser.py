@@ -9,7 +9,7 @@ import logging.handlers
 import wikiatools
 import episodeparsers
 
-DEBUG = True
+DEBUG = False
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -96,72 +96,46 @@ def get_episodes(feed):
         # format to correct url based on podcast
         # ONE-SHOT
         if podcast == 'one-shot' or any(t.term == 'One Shot' for t in f.tags):
+            logger.info('One Shot Episode')
             feed_episode = episodeparsers.OneShotParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # CAMPAIGN
         elif podcast == 'campaign' or any(t.term == 'Campaign' for t in f.tags):
+            logger.info('Campaign Episode')
             feed_episode = episodeparsers.CampaignParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # First WATCH
         elif podcast == 'first-watch' or any(t.term == 'First Watch' for t in f.tags):
+            logger.info('First Watch Episode')
             feed_episode = episodeparsers.FirstWatchParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # CRITICAL SUCCESS
         elif podcast == 'critical-success' or any(t.term == 'Critical Success' for t in f.tags):
+            logger.info('Critical Success Episode')
             feed_episode = episodeparsers.CriticalSuccessParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # BACKSTORY
         elif podcast == 'backstory' or any(t.term == 'Backstory' for t in f.tags):
+            logger.info('Backstory Episode')
             feed_episode = episodeparsers.BackstoryParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # MODIFIER
         elif podcast == 'modifier' or any(t.term == 'Modifier' for t in f.tags):
+            logger.info('Modifier Episode')
             feed_episode = episodeparsers.ModifierParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # TALKING-TABLETOP
         elif podcast == 'talking-table-top' or any(t.term == 'Talking Table Top' for t in f.tags):
+            logger.info('Talking TableTop Episode')
             feed_episode = episodeparsers.TalkingTableTopParser(f)
-            feed_episode.parse_episode()
-
-            commands.extend(feed_episode.commands)
-
-            logger.debug(feed_episode.wiki_content())
 
         # UNKNOWN PODCAST
         else:
             logger.warning('UNKNOWN PODCAST: %s', podcast)
             continue
 
+        commands.extend(feed_episode.commands)
+        logger.debug(feed_episode.wiki_content())
         wikiatools.write_page(title=feed_episode.wiki_page, content=feed_episode.wiki_content())
     return commands
 

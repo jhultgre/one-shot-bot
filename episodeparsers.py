@@ -29,12 +29,17 @@ class Parser(object):
 
     def __init__(self, f):
         """
-        gets local variables from a feedparser element
+        Runs through setup and parsing
 
         Args:
             f (feedparser element): One feed element
         """
         super(Parser, self).__init__()
+
+        self.setup(f)
+        self.parse_episode()
+
+    def setup(self, f):
         # set the common attributes
         self.f = f
         self.values['$title'] = f.title
@@ -142,9 +147,9 @@ class BackstoryParser(Parser):
     """Parser for Backstory"""
 
     def __init__(self, f):
-        super(BackstoryParser, self).__init__(f)
         self.podcast = 'Backstory'
         self.template_name = 'templates/backstory.template'
+        super(BackstoryParser, self).__init__(f)
 
     def parse_episode(self):
 
@@ -158,9 +163,9 @@ class ModifierParser(Parser):
     """Parser for Modifier"""
 
     def __init__(self, f):
-        super(ModifierParser, self).__init__(f)
         self.podcast = 'Modifier'
         self.template_name = 'templates/modifier.template'
+        super(ModifierParser, self).__init__(f)
 
     def parse_episode(self):
 
@@ -182,9 +187,9 @@ class TalkingTableTopParser(Parser):
     """Parser for TalkingTableTop"""
 
     def __init__(self, f):
-        super(TalkingTableTopParser, self).__init__(f)
         self.podcast = 'Talking TableTop'
         self.template_name = 'templates/talking-tabletop.template'
+        super(TalkingTableTopParser, self).__init__(f)
 
     def parse_episode(self):
 
@@ -207,9 +212,9 @@ class CriticalSuccessParser(Parser):
     """Parser for CriticalSuccess"""
 
     def __init__(self, f):
-        super(CriticalSuccessParser, self).__init__(f)
         self.podcast = 'Critical Success'
         self.template_name = 'templates/critical-success.template'
+        super(CriticalSuccessParser, self).__init__(f)
 
     def parse_episode(self):
 
@@ -232,9 +237,9 @@ class CampaignParser(Parser):
     """Parser for Campaign"""
 
     def __init__(self, f):
-        super(CampaignParser, self).__init__(f)
         self.podcast = 'Campaign'
         self.template_name = 'templates/campaign.template'
+        super(CampaignParser, self).__init__(f)
 
     def parse_episode(self):
 
@@ -314,10 +319,10 @@ class OneShotParser(Parser):
     """Parser for OneShot"""
 
     def __init__(self, f):
-        super(OneShotParser, self).__init__(f)
         self.podcast = 'Episode'
         self.template_name = 'templates/one-shot.template'
         self.adjacent_link = '[[{podcast} {num}|One Shot Episode {num}]]'
+        super(OneShotParser, self).__init__(f)
 
     def parse_episode(self):
         title = self.values['$title']
@@ -367,9 +372,9 @@ class NTMtPParser(object):
     """Parser for NTMtP"""
 
     def __init__(self, f):
-        super(NTMtPParser, self).__init__(f)
         self.podcast = 'NTMtP'
         self.template_name = 'templates/ntmtp.template'
+        super(NTMtPParser, self).__init__(f)
 
     def parse_episode(self):
         title = self.values['$title']
