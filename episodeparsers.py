@@ -25,12 +25,16 @@ class Parser(object):
         super(Parser, self).__init__()
         # set the common attributes
         self.f = f
-
         self.values = defaultdict(lambda: '')
-
         self.values['$title'] = f.title
         self.guid = f.guid
+        # self.values['$cats'] = ''
+        self.specifier = ''
+        self.adjacent_link = '[[{podcast} {num}]]'
+        self.link = f.link
+        self.commands = []
 
+        # get description
         if 'content' in f and 'value' in f.content[0]:
             desc = f.content[0].value
         elif 'subtitle' in f:
@@ -42,21 +46,13 @@ class Parser(object):
         desc = wikiatools.format_text(desc)
 
         desc += '\n\n[%s Listen!]' % f.link
-        self.link = f.link
-        self.specifier = ''
 
         self.values['$desc'] = desc
-        self.values['$cats'] = ''
-
-        self.commands = []
-
-        podcast = f.links[0].href.split('.com/podcasts/')[1].split('/')[0]
 
         logger.info('==========')
         logger.info(self.values['$title'])
         logger.info(desc)
         logger.info(f.link)
-        logger.info(podcast)
 
     # get the basics
     def parse_episode(self):
@@ -67,6 +63,8 @@ class Parser(object):
             number = int(re.findall(r'^\d+', title)[0])
         except:
             number = None
+
+        self.number = number
 
         self.base_title = re.findall(r'^(?:\d*[.:;!])?\s*(.*)', title)[0]
 
@@ -83,8 +81,9 @@ class Parser(object):
         # fill in links
         if number:
             self.wiki_page = '{podcast} {num}'.format(podcast=self.podcast, num=number)
-            self.values['$prev'] = '[[{podcast} {num}]]'.format(podcast=self.podcast, num=number - 1)
-            self.values['$next'] = '[[{podcast} {num}]]'.format(podcast=self.podcast, num=number + 1)
+
+            self.values['$prev'] = self.adjacent_link.format(podcast=self.podcast, num=number - 1)
+            self.values['$next'] = self.adjacent_link.format(podcast=self.podcast, num=number + 1)
         else:
             self.generic_links()
 
@@ -285,3 +284,60 @@ class FirstWatchParser(Parser):
                     '{}: {}'.format(self.wiki_page, title),
                     self.link,
                     '-first-watch'))
+
+
+class OneShotParser(Parser):
+
+    """docstring for OneShotParser"""
+
+    def __init__(self, f):
+        super(OneShotParser, self).__init__(f)
+        self.podcast = 'Episode'
+        self.template_name = 'templates/one-shot.template'
+        self.adjacent_link = '[[{podcast} {num}|One Shot Episode {num}]]'
+
+    def parse_episode(self):
+        title = self.values['$title']
+
+        # if bonus episode
+        if 'BONUS' in title:
+            logger.debug('bonus episode')
+
+            prev_info = EpisodeInfo('FakeEp')
+
+            with EpisodeManager('oneshot-bonus') as em:
+                em.add_episode(title, self.guid)
+                number = em.get_episode_number(self.guid)
+                self.values['$prev'] = '[[Episode BONUS %s]]' % (number - 1)
+                self.values['$next'] = '[[Episode BONUS %s]]' % (number + 1)
+                self.wiki_page = 'Episode BONUS %s' % number
+                self.commands.append(wikiatools.update_episode_list(
+                    'One Shot',
+                    self.wiki_page,
+                    'One Shot Bonus Episode {num}: {title}'.format(num=number, title=title),
+                    self.link))
+        else:
+            super(OneShotParser, self).parse_episode()
+
+            part = re.findall(r'(?:[Pp]art )(\d+)', title)
+
+            if part and int(part[0]) > 1 and self.number:
+                prev_info = EpisodeInfo('Episode %s' % (self.number - 1))
+            else:
+                prev_info = EpisodeInfo('FakeEp')
+
+            if self.number:
+                self.commands = [wikiatools.update_episode_list(
+                    'One Shot',
+                    self.wiki_page,
+                    'One Shot Episode %s: %s' % (self.number, self.base_title),
+                    self.link)]
+
+        self.values['$gm'] = prev_info.get_gm(True)
+        self.values['$players'] = prev_info.get_players(True)
+        self.values['$system'] = prev_info.get_system(True)
+        self.values['$series'] = prev_info.get_series(True)
+
+        # else super.parse
+
+        # replace commands
