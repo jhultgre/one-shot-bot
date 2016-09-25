@@ -73,15 +73,15 @@ def main():
     logger.info(commands)
     logger.info('sending pages to wiki')
 
-    # if not DEBUG:
-    #     wikiatools.post_pages()
-    #     for c in commands:
-    #         wikiatools.run_command(c)
+    if not DEBUG:
+        wikiatools.post_pages()
+        for c in commands:
+            wikiatools.run_command(c)
 
-    # with open('.oneshot.etag', 'w') as f:
-    #     logger.info('writing etag: %s' % feed.etag)
-    #     if not DEBUG:
-    #         f.write(feed.etag)
+    with open('.oneshot.etag', 'w') as f:
+        logger.info('writing etag: %s' % feed.etag)
+        if not DEBUG:
+            f.write(feed.etag)
 
     logger.info('Finished')
 

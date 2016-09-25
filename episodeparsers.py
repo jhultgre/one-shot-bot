@@ -14,25 +14,32 @@ logger = logging.getLogger(__name__)
 class Parser(object):
 
     """
-    base parser for oneshot feed episodes
+    Base Parser for oneshot feed episodes
     derived classes need to define:
-    self.podcast
-    self.template_name
+    self.podcast - to set link prefix
+    self.template_name - to set template to use
     optional
+    self.specifier - value to use for wiki replacement tag
     """
 
+    values = defaultdict(lambda: '')
+    specifier = ''
+    adjacent_link = '[[{podcast} {num}]]'
+    commands = []
+
     def __init__(self, f):
+        """
+        gets local variables from a feedparser element
+
+        Args:
+            f (feedparser element): One feed element
+        """
         super(Parser, self).__init__()
         # set the common attributes
         self.f = f
-        self.values = defaultdict(lambda: '')
         self.values['$title'] = f.title
         self.guid = f.guid
-        # self.values['$cats'] = ''
-        self.specifier = ''
-        self.adjacent_link = '[[{podcast} {num}]]'
         self.link = f.link
-        self.commands = []
 
         # get description
         if 'content' in f and 'value' in f.content[0]:
@@ -51,11 +58,14 @@ class Parser(object):
 
         logger.info('==========')
         logger.info(self.values['$title'])
-        logger.info(desc)
+        logger.debug(desc)
         logger.info(f.link)
 
     # get the basics
     def parse_episode(self):
+        """
+        Get information common to most podcasts
+        """
         # get number and episode title
         title = self.values['$title']
 
@@ -65,7 +75,6 @@ class Parser(object):
             number = None
 
         self.number = number
-
         self.base_title = re.findall(r'^(?:\d*[.:;!])?\s*(.*)', title)[0]
 
         logger.info('base_title: ' + self.base_title)
@@ -88,6 +97,10 @@ class Parser(object):
             self.generic_links()
 
     def generic_links(self):
+        """
+        Sets default template values if they can't be extracted from the feed
+        """
+        logger.debug('using generic links')
         if not self.wiki_page:
             self.wiki_page = '{podcast} {title}'.format(podcast=self.podcast, title=self.values['$title'])
 
@@ -97,6 +110,15 @@ class Parser(object):
 
     # return the template
     def wiki_content(self):
+        """
+        Fills in values in the podcast's template.
+
+        Returns:
+            string: the text for the wiki page
+
+        Raises:
+            NameError: If the template to load hasn't been set
+        """
         logger.debug('fill templates')
         logger.debug(self.template_name)
 
@@ -117,7 +139,7 @@ class Parser(object):
 
 class BackstoryParser(Parser):
 
-    """docstring for BackstoryParser"""
+    """Parser for Backstory"""
 
     def __init__(self, f):
         super(BackstoryParser, self).__init__(f)
@@ -133,7 +155,7 @@ class BackstoryParser(Parser):
 
 class ModifierParser(Parser):
 
-    """docstring for ModifierParser"""
+    """Parser for Modifier"""
 
     def __init__(self, f):
         super(ModifierParser, self).__init__(f)
@@ -157,7 +179,7 @@ class ModifierParser(Parser):
 
 class TalkingTableTopParser(Parser):
 
-    """docstring for TalkingTableTopParser"""
+    """Parser for TalkingTableTop"""
 
     def __init__(self, f):
         super(TalkingTableTopParser, self).__init__(f)
@@ -182,7 +204,7 @@ class TalkingTableTopParser(Parser):
 
 class CriticalSuccessParser(Parser):
 
-    """docstring for CriticalSuccessParser"""
+    """Parser for CriticalSuccess"""
 
     def __init__(self, f):
         super(CriticalSuccessParser, self).__init__(f)
@@ -207,7 +229,7 @@ class CriticalSuccessParser(Parser):
 
 class CampaignParser(Parser):
 
-    """docstring for CampaignParser"""
+    """Parser for Campaign"""
 
     def __init__(self, f):
         super(CampaignParser, self).__init__(f)
@@ -243,7 +265,7 @@ class CampaignParser(Parser):
 
 class FirstWatchParser(Parser):
 
-    """docstring for FirstWatchParser"""
+    """Parser for FirstWatch"""
 
     def __init__(self, f):
         super(FirstWatchParser, self).__init__(f)
@@ -288,7 +310,7 @@ class FirstWatchParser(Parser):
 
 class OneShotParser(Parser):
 
-    """docstring for OneShotParser"""
+    """Parser for OneShot"""
 
     def __init__(self, f):
         super(OneShotParser, self).__init__(f)
@@ -337,7 +359,3 @@ class OneShotParser(Parser):
         self.values['$players'] = prev_info.get_players(True)
         self.values['$system'] = prev_info.get_system(True)
         self.values['$series'] = prev_info.get_series(True)
-
-        # else super.parse
-
-        # replace commands
