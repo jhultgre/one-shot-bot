@@ -6,6 +6,7 @@ import re
 import sys
 import codecs
 import io
+import wikiatools
 
 
 reload(sys)
@@ -25,6 +26,7 @@ class EpisodeInfo(object):
     system_re = r'\|[Ss]ystem ?= ?(.*?)(?:\n|\|\w* =)'
 
     """Gets information about episode page"""
+
     def __init__(self, page):
         logger.info('Get info for: ' + page)
 
@@ -39,6 +41,14 @@ class EpisodeInfo(object):
 
         ep = page.replace(' ', '_')
         path = os.path.join('test_files/episodes/', ep)
+
+        if page == 'DummyEp':
+            return
+
+        # try to get the page if we don't already have it
+        if not os.path.exists(path):
+            options = ['-page:"%s"' % page]
+            wikiatools.get_pages(location='../one-shot-bot/test_files/episodes', options=options)
 
         if os.path.exists(path):
             with io.open(path, encoding='utf-8') as f:

@@ -65,6 +65,12 @@ def post_pages():
     run_command(command)
 
 
+def get_pages(location, options):
+    command = 'python pwb.py listpages -save:"{location}"'.format(location=location)
+    command = ' '.join([command].extend(options))
+    run_command(command)
+
+
 def update_episode_list(page, episode, title, link='', specifier=''):
     raw_link = ('python pwb.py replace '
                 '-page:"{0}" '

@@ -331,7 +331,7 @@ class OneShotParser(Parser):
         if 'BONUS' in title:
             logger.debug('bonus episode')
 
-            prev_info = EpisodeInfo('FakeEp')
+            prev_info = EpisodeInfo('DummyEp')
 
             with EpisodeManager('oneshot-bonus') as em:
                 em.add_episode(title, self.guid)
@@ -352,7 +352,7 @@ class OneShotParser(Parser):
             if part and int(part[0]) > 1 and self.number:
                 prev_info = EpisodeInfo('Episode %s' % (self.number - 1))
             else:
-                prev_info = EpisodeInfo('FakeEp')
+                prev_info = EpisodeInfo('DummyEp')
 
             if self.number:
                 self.commands = [wikiatools.update_episode_list(
