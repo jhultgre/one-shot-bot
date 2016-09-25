@@ -269,6 +269,7 @@ class FirstWatchParser(Parser):
 
     def __init__(self, f):
         super(FirstWatchParser, self).__init__(f)
+        # dont set variables until parse
 
     def parse_episode(self):
         title = self.values['$title']
@@ -359,3 +360,37 @@ class OneShotParser(Parser):
         self.values['$players'] = prev_info.get_players(True)
         self.values['$system'] = prev_info.get_system(True)
         self.values['$series'] = prev_info.get_series(True)
+
+
+class NTMtPParser(object):
+
+    """Parser for NTMtP"""
+
+    def __init__(self, f):
+        super(NTMtPParser, self).__init__(f)
+        self.podcast = 'NTMtP'
+        self.template_name = 'templates/ntmtp.template'
+
+    def parse_episode(self):
+        title = self.values['$title']
+
+        if 'episode' in title.lower():
+            super(NTMtPParser, self).parse_episode()
+
+            self.commands = [wikiatools.update_episode_list(
+                'Never Tell Me The Pods',
+                self.wiki_page,
+                'NTMtP ' + title, self.link)]
+
+        # annotations
+        elif 'annotation' in title.lower():
+            # add command to update annotations
+
+            desc = self.values['$desc']
+            desc = re.sub(r'(?:\[(.*) Listen!\]', '[\1 Direct Link!]', desc)
+            self.values['$desc'] = '\n== Annotations ==\n' + desc
+
+            self.commands = [wikiatools.add_text_command(
+                'NTMtP %s' % self.number,
+                desc,
+                '(== [Aa]nnotations ==)')]
