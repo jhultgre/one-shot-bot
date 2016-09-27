@@ -1,11 +1,13 @@
 # -*- coding: utf-8  -*-
-import feedparser
 import sys
 import codecs
 import logging
 import logging.handlers
-import re
+
+import feedparser
+
 import wikiatools
+import episodeparsers
 
 DEBUG = False
 
@@ -58,7 +60,7 @@ def main():
     feed = feedparser.parse(ntmtp_rss)
 
     # logger.info('Feed status: %s', feed.status)
-    print feed
+    # print feed
     if feed.status == 304:
         logger.info('No new episodes quiting')
         return
@@ -87,57 +89,11 @@ def get_episodes(feed):
     logger.info('get episodes')
     commands = []
     for f in reversed(feed.entries):
-        title = f.title
-        # attempt to get a description
-        if 'summary_detail' in f and 'value' in f.summary_detail:
-            desc = f.summary_detail.value
-        elif 'subtitle' in f:
-            desc = f.subtitle
-        elif 'description' in f:
-            desc = f.description
-        else:
-            continue
+        episode = episodeparsers.NTMtPParser(f)
+        if 'episode' in f.title.lower():
+            wikiatools.write_page(episode.wiki_page, episode.wiki_content())
 
-        desc = wikiatools.format_links(desc)
-        desc = wikiatools.format_text(desc)
-
-        # fix for leading spaces
-        desc = re.sub('\n *', '\n', desc)
-
-        link = f.link
-
-        logger.info('==========')
-        logger.info(title)
-        logger.info(desc)
-        logger.info(link)
-
-        try:
-            number = int(re.findall(r'\d+', title)[0])
-        except:
-            logger.info('No number in ' + title)
-            continue
-        # episode post
-        if 'episode' in title.lower():
-            desc += '\n\n[%s Listen!]' % link
-            with open('templates/ntmtp.template') as f:
-                template = f.read()
-
-                prev_episode = '[[NTMtP %s]]' % (number - 1)
-                next_episode = '[[NTMtP %s]]' % (number + 1)
-                # title exists
-
-                episode = 'NTMtP %s' % number
-                commands.append(wikiatools.update_episode_list('Never Tell Me The Pods', episode, 'NTMtP ' + title, link))
-
-                template = template.replace('$title', title).replace('$prev', prev_episode).replace('$next', next_episode)
-                logger.debug(template)
-                wikiatools.write_page(title=episode, content=template + '\n' + desc)
-
-        # annotations
-        elif 'annotation' in title.lower():
-            # add command to update annotations
-            desc = '\n== Annotations ==\n' + desc + '\n\n[%s Direct Link!]' % link
-            commands.append(wikiatools.add_text_command('NTMtP %s' % number, desc, '(== [Aa]nnotations ==)'))
+        commands.extend(episode.commands)
 
     return commands
 

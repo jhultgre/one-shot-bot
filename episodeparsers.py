@@ -14,18 +14,31 @@ logger = logging.getLogger(__name__)
 class Parser(object):
 
     """
-    Base Parser for oneshot feed episodes
-    derived classes need to define:
-    self.podcast - to set link prefix
-    self.template_name - to set template to use
-    optional
-    self.specifier - value to use for wiki replacement tag
-    """
+    Base parser class
 
+    Attributes:
+        adjacent_link (str): form the links should take for prev and next episodes
+            Replaces {podcast} with self.podcast
+            and {num} with next and previous number based on self.number
+        base_title (str): episode title without number
+        commands (list): list of pywikibots commands that should be run
+        f (feed entre): The feed item
+        guid (str): unique identifier of the feed entre
+        link (str): Link to the podcast episode
+        number (number): which number episode this is
+        podcast (str): string episodes are listed under on the wiki
+        specifier (str): which r2-d20 replacement to use on the page
+        template_name (str): which template to  use
+        values (defaultdict): list of values to replace in the template
+        wiki_page (str): The name on the wiki of this page
+    """
     values = defaultdict(lambda: '')
     specifier = ''
     adjacent_link = '[[{podcast} {num}]]'
     commands = []
+    wiki_page = None
+    podcast = None
+    template_name = None
 
     def __init__(self, f):
         """
@@ -74,32 +87,43 @@ class Parser(object):
         # get number and episode title
         title = self.values['$title']
 
-        try:
-            number = int(re.findall(r'^\d+', title)[0])
-        except:
-            number = None
-
-        self.number = number
+        self.get_number()
         self.base_title = re.findall(r'^(?:\d*[.:;!])?\s*(.*)', title)[0]
 
         logger.info('base_title: ' + self.base_title)
 
+        if not self.podcast:
+            raise KeyError('self.podcast not set for ' + __name__)
+
         if self.base_title:
             self.commands.append(wikiatools.update_episode_list(
                 self.podcast,
-                '{podcast} {num}'.format(podcast=self.podcast, num=number),
-                '{podcast} {num}: {title}'.format(podcast=self.podcast, num=number, title=self.base_title),
+                '{podcast} {num}'.format(podcast=self.podcast, num=self.number),
+                '{podcast} {num}: {title}'.format(podcast=self.podcast, num=self.number, title=self.base_title),
                 self.link,
                 self.specifier))
 
         # fill in links
-        if number:
-            self.wiki_page = '{podcast} {num}'.format(podcast=self.podcast, num=number)
+        if self.number:
+            self.wiki_page = '{podcast} {num}'.format(podcast=self.podcast, num=self.number)
 
-            self.values['$prev'] = self.adjacent_link.format(podcast=self.podcast, num=number - 1)
-            self.values['$next'] = self.adjacent_link.format(podcast=self.podcast, num=number + 1)
+            self.values['$prev'] = self.adjacent_link.format(podcast=self.podcast, num=self.number - 1)
+            self.values['$next'] = self.adjacent_link.format(podcast=self.podcast, num=self.number + 1)
         else:
             self.generic_links()
+
+    def get_number(self):
+        try:
+            self.number
+            return
+        except:
+            pass
+        try:
+            number = int(re.findall(r'^\d+', self.values['$title'])[0])
+        except:
+            number = None
+
+        self.number = number
 
     def generic_links(self):
         """
@@ -147,6 +171,7 @@ class BackstoryParser(Parser):
     """Parser for Backstory"""
 
     def __init__(self, f):
+
         self.podcast = 'Backstory'
         self.template_name = 'templates/backstory.template'
         super(BackstoryParser, self).__init__(f)
@@ -260,6 +285,7 @@ class CampaignParser(Parser):
             self.commands.append(wikiatools.update_episode_list('Campaign:Campaign', self.wiki_page, title, self.link))
             self.commands.append(wikiatools.update_episode_list('Campaign:Chronology', self.wiki_page, title))
 
+            # add the redirect page now
             wikiatools.write_page('Campaign:{}Episode {}'.format(title_parts[0], str(number)),
                                   '#REDIRECT [[{}]]'.format(self.wiki_page))
         except Exception:
@@ -367,7 +393,7 @@ class OneShotParser(Parser):
         self.values['$series'] = prev_info.get_series(True)
 
 
-class NTMtPParser(object):
+class NTMtPParser(Parser):
 
     """Parser for NTMtP"""
 
@@ -379,6 +405,13 @@ class NTMtPParser(object):
     def parse_episode(self):
         title = self.values['$title']
 
+        self.annotation = False
+
+        try:
+            self.number = int(re.findall(r'\d+', title)[0])
+        except:
+            self.number = None
+
         if 'episode' in title.lower():
             super(NTMtPParser, self).parse_episode()
 
@@ -389,11 +422,12 @@ class NTMtPParser(object):
 
         # annotations
         elif 'annotation' in title.lower():
+            self.annotation = True
             # add command to update annotations
 
             desc = self.values['$desc']
-            desc = re.sub(r'(?:\[(.*) Listen!\]', '[\1 Direct Link!]', desc)
-            self.values['$desc'] = '\n== Annotations ==\n' + desc
+            desc = re.sub(r'(?:\[(.*) Listen!\])', r'[\1 Direct Link!]', desc)
+            desc = '\n== Annotations ==\n' + desc
 
             self.commands = [wikiatools.add_text_command(
                 'NTMtP %s' % self.number,
