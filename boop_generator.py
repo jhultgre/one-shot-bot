@@ -4,6 +4,12 @@ logger = logging.getLogger(__name__)
 
 
 def get_boop():
+    """
+    Constructs robot boop noise.
+
+    Returns:
+        string: beep-boop
+    """
     beeps = [
         'Beep',
         'Bleep',

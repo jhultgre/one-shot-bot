@@ -16,6 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 def format_links(text):
+    """
+    Attempt to transform html links to wiki links.
+
+    Args:
+        text (string): String to transform links.
+
+    Returns:
+        string: The transformed string.
+    """
     logger.info('formating links')
     return re.sub(r'<a href="(.*?)".*?>(.*?)</a>', r'[\1 \2]', text)
 

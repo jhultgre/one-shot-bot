@@ -1,11 +1,13 @@
 # -*- coding: utf-8  -*-
 from __future__ import unicode_literals
-import feedparser
 import sys
 import os
 import codecs
 import logging
 import logging.handlers
+
+import feedparser
+
 import wikiatools
 import episodeparsers
 
