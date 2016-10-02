@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import logging
 import re
+import os
 from collections import defaultdict
 
 import numberutilites as num_utils
@@ -422,6 +423,8 @@ class NTMtPParser(Parser):
 
         # annotations
         elif 'annotation' in title.lower():
+            if os.path.exists('test_files/episodes/NTMtP_%s' % self.number):
+                return
             self.annotation = True
             # add command to update annotations
 
