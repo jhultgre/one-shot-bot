@@ -225,10 +225,9 @@ class TalkingTableTopParser(Parser):
 
         if len(guest) > 1:
             guest = '[[%s]]' % guest[1].strip()
+            guest = guest.replace(' and ', ']]<br />[[')
         else:
             guest = '[[%s]]' % self.base_title
-
-        guest = guest.replace(' and ', ']]<br />[[')
 
         self.values['$guest'] = guest
 
@@ -250,10 +249,9 @@ class CriticalSuccessParser(Parser):
 
         if len(guest) > 1:
             guest = '[[%s]]' % guest[1].strip()
+            guest = guest.replace(' and ', ']]<br />[[')
         else:
             guest = ''
-
-        guest = guest.replace(' and ', ']]<br />[[')
 
         self.values['$guest'] = guest
 
