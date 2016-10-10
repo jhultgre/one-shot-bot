@@ -76,7 +76,7 @@ def post_pages():
 
 def get_pages(location, options):
     command = 'python pwb.py listpages -save:"{location}"'.format(location=location)
-    command = ' '.join([command].extend(options))
+    command = ' '.join([command] + options)
     run_command(command)
 
 

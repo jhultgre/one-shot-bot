@@ -305,6 +305,7 @@ class FirstWatchParser(Parser):
         title = self.values['$title']
 
         if 'Second' in title:
+            logger.info("Second Watch Episode")
             self.template_name = 'templates/second-watch.template'
 
             with EpisodeManager('second-watch') as em:
@@ -322,6 +323,7 @@ class FirstWatchParser(Parser):
                     self.link,
                     '-second-watch'))
         else:
+            logger.info("First Watch Episode")
             self.template_name = 'templates/first-watch.template'
 
             with EpisodeManager('first-watch') as em:
