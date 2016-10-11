@@ -88,7 +88,7 @@ def main():
 def get_episodes(feed):
     logger.info('get episodes')
     commands = []
-    for f in reversed(feed.entries):
+    for f in reversed(feed.entries[:10]):
         episode = episodeparsers.NTMtPParser(f)
         if 'episode' in f.title.lower():
             wikiatools.write_page(episode.wiki_page, episode.wiki_content())
