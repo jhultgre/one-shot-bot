@@ -11,7 +11,7 @@ import feedparser
 import wikiatools
 import episodeparsers
 
-DEBUG = False
+DEBUG = True
 
 reload(sys)
 sys.setdefaultencoding('utf-8')

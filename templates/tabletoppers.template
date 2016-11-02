@@ -1,0 +1,11 @@
+{{TableToppersEpisode
+|name = $title
+|prev = $prev
+|next = $next
+|guest = $guest
+}}
+
+== Blurb ==
+
+$desc
+$cats
